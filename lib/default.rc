@@ -1,7 +1,7 @@
 # Default values for config/overleaf.rc
 
 PROJECT_NAME=overleaf
-SERVER_PRO=false
+SERVER_PRO=true
 OVERLEAF_DATA_PATH=data/sharelatex
 OVERLEAF_PORT=80
 
