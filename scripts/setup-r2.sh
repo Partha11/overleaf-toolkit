@@ -112,11 +112,13 @@ echo "    AWS_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=<secret> \\"
 echo "      aws s3api create-bucket --endpoint-url https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com \\"
 echo "      --bucket $R2_BUCKET --region auto --create-bucket-configuration LocationConstraint=EU"
 echo
-echo "Verifying the new config (lsd r2-crypt:) ..."
-if "$RCLONE_BIN" --config "$BACKUP_ETC_DIR/rclone.conf" lsd r2-crypt: >/dev/null 2>&1; then
+# lsf (not lsd) is used because lsd reports "directory not found" on a fresh,
+# empty bucket even though the credentials and crypt password are fine.
+echo "Verifying the new config (lsf r2-crypt:) ..."
+if "$RCLONE_BIN" --config "$BACKUP_ETC_DIR/rclone.conf" lsf r2-crypt: >/dev/null 2>&1; then
   echo "OK: can list r2-crypt: - crypt password and credentials are valid."
 else
   echo "WARNING: could not list r2-crypt: - the rclone config may be invalid, or the"
   echo "         bucket/token may be wrong. Debug with:"
-  echo "  sudo $RCLONE_BIN --config $BACKUP_ETC_DIR/rclone.conf lsd r2-crypt:"
+  echo "  sudo $RCLONE_BIN --config $BACKUP_ETC_DIR/rclone.conf lsf r2-crypt:"
 fi
