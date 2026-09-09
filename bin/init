@@ -15,6 +15,8 @@ if [[ ! -d "$TOOLKIT_ROOT/bin" ]] || [[ ! -d "$TOOLKIT_ROOT/config" ]]; then
   exit 1
 fi
 
+source "$TOOLKIT_ROOT/lib/shared-functions.sh"
+
 function usage() {
   echo "Usage: bin/init [OPTION]"
   echo ""
@@ -46,13 +48,6 @@ function set_up_config_files() {
   invite_token_secret="$(openssl rand -base64 32)"
   sed -i'' "s|OVERLEAF_INVITE_TOKEN_SECRET=|OVERLEAF_INVITE_TOKEN_SECRET=${invite_token_secret}|" \
     "$TOOLKIT_ROOT/config/variables.env"
-  # Install the custom docker-compose override (tabs, review, themes) if present.
-  # It is generated from the tracked overrides/ directory so the setup survives
-  # across machines, while keeping secrets out of version control.
-  if [[ -f "$TOOLKIT_ROOT/overrides/docker-compose.override.yml" ]]; then
-    echo "Copying docker-compose.override.yml to 'config/'"
-    cp "$TOOLKIT_ROOT/overrides/docker-compose.override.yml" "$TOOLKIT_ROOT/config/"
-  fi
 }
 
 function set_up_tls_proxy() {
@@ -99,6 +94,9 @@ function __main__() {
       set_up_tls_proxy
     fi
   fi
+  # Refresh the tracked docker-compose override into config/ whenever it is
+  # missing or out of date, without touching any existing config files.
+  sync_docker_compose_override
   if config_exists; then
     if [[ "$TLS" == "true" ]]; then
       echo "Config files already exist, exiting"

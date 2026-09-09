@@ -10,3 +10,5 @@ config/**/*
 
 data/**/*
 !data/.gitkeep
+
+*.bak

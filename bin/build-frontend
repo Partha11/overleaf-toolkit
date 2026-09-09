@@ -38,6 +38,19 @@ function ensure_build_container() {
   docker run -d --name "$BUILD_CONTAINER" --entrypoint sleep "$IMAGE" infinity
 }
 
+# Report the package manager to use for the frontend build. Prefer pnpm, then
+# yarn, then npm, whichever is actually available inside the build container.
+function detect_package_manager() {
+  local pkg
+  for pkg in pnpm yarn npm; do
+    if docker exec "$BUILD_CONTAINER" sh -c "command -v $pkg" >/dev/null 2>&1; then
+      echo "$pkg"
+      return 0
+    fi
+  done
+  return 1
+}
+
 function main() {
   read_image_version
   read_config
@@ -68,12 +81,34 @@ function main() {
   docker cp "$OVERRIDES_DIR/github_dark.json" \
     "$BUILD_CONTAINER:$THEME_SRC/github_dark.json"
 
-  echo "Restoring dev dependencies (yarn install)..."
-  docker exec "$BUILD_CONTAINER" sh -c 'cd /overleaf && yarn install'
+  local pkg_manager install_cmd build_cmd
+  if ! pkg_manager="$(detect_package_manager)"; then
+    echo "ERROR: no package manager (pnpm, yarn or npm) found in image $IMAGE" >&2
+    echo "  Install pnpm, yarn or npm in the image, or use a different image tag." >&2
+    exit 1
+  fi
+  echo "Using package manager: $pkg_manager"
+
+  case "$pkg_manager" in
+    pnpm)
+      install_cmd="cd /overleaf && pnpm install"
+      build_cmd="cd /overleaf/services/web && NODE_OPTIONS=--max-old-space-size=6144 pnpm run webpack:production"
+      ;;
+    yarn)
+      install_cmd="cd /overleaf && yarn install"
+      build_cmd="cd /overleaf/services/web && NODE_OPTIONS=--max-old-space-size=6144 yarn run webpack:production"
+      ;;
+    npm)
+      install_cmd="cd /overleaf && npm install"
+      build_cmd="cd /overleaf/services/web && NODE_OPTIONS=--max-old-space-size=6144 npm run webpack:production"
+      ;;
+  esac
+
+  echo "Restoring dev dependencies ($pkg_manager install)..."
+  docker exec "$BUILD_CONTAINER" sh -c "$install_cmd"
 
   echo "Running webpack production build..."
-  docker exec "$BUILD_CONTAINER" sh -c \
-    'cd /overleaf/services/web && NODE_OPTIONS=--max-old-space-size=6144 yarn run webpack:production'
+  docker exec "$BUILD_CONTAINER" sh -c "$build_cmd"
 
   echo "Copying built assets to $PUBLIC_DIR ..."
   mkdir -p "$PUBLIC_DIR"

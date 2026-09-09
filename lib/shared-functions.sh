@@ -138,6 +138,34 @@ prompt() {
     fi
 }
 
+# Keep config/docker-compose.override.yml in sync with the tracked
+# overrides/docker-compose.override.yml. The tracked overrides live in the
+# overrides/ directory (which is under version control), while the runtime copy
+# lives in config/ (which is gitignored). This function installs or refreshes
+# the config/ copy, backing up any previous one, and never touches any other
+# file (in particular it never touches the data/ directory).
+function sync_docker_compose_override() {
+  local source="$TOOLKIT_ROOT/overrides/docker-compose.override.yml"
+  local target="$TOOLKIT_ROOT/config/docker-compose.override.yml"
+  if [[ ! -f "$source" ]]; then
+    return 0
+  fi
+  if [[ ! -f "$target" ]]; then
+    echo "Installing docker-compose.override.yml to 'config/'"
+    cp "$source" "$target"
+    return 0
+  fi
+  if diff -q "$source" "$target" >/dev/null 2>&1; then
+    return 0
+  fi
+  local timestamp
+  timestamp="$(date "+%Y.%m.%d-%H.%M.%S")"
+  echo "Updating docker-compose.override.yml in 'config/'"
+  echo "  Backing up previous copy to 'config/__old-docker-compose.override.yml.$timestamp'"
+  cp "$target" "$TOOLKIT_ROOT/config/__old-docker-compose.override.yml.$timestamp"
+  cp "$source" "$target"
+}
+
 rebrand_sharelatex_env_variables() {
   local filename=$1
   local silent=${2:-no}

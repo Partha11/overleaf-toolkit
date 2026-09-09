@@ -278,6 +278,10 @@ function __main__() {
     handle_git_update
   fi
 
+  # Refresh the tracked docker-compose override into config/ whenever it is
+  # missing or out of date, without touching any existing config files.
+  sync_docker_compose_override
+
   read_seed_image_version
   read_image_version
   read_config
