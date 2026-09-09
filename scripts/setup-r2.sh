@@ -18,7 +18,7 @@ set -euo pipefail
 R2_ACCOUNT_ID="${R2_ACCOUNT_ID:-}"
 R2_ACCESS_KEY_ID="${R2_ACCESS_KEY_ID:-}"
 R2_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY:-}"
-R2_BUCKET="${R2_BUCKET:-overleaf-backups}"
+R2_BUCKET="${R2_BUCKET:-overleaf}"
 BACKUP_ETC_DIR="${BACKUP_ETC_DIR:-/etc/overleaf-backup}"
 RCLONE_BIN="${RCLONE_BIN:-rclone}"
 
@@ -42,12 +42,30 @@ prompt R2_ACCESS_KEY_ID "R2 API Token Access Key ID (bucket-scoped, read+write)"
 prompt R2_SECRET_ACCESS_KEY "R2 API Token Secret Access Key"
 prompt R2_BUCKET "R2 bucket name (dedicated to Overleaf backups)"
 
-# Generate two fresh random secrets for the rclone crypt remote.
+# Generate two fresh random secrets for the rclone crypt remote. The values are
+# stored in the config file OBSCURED with `rclone obscure`, which is the format
+# rclone expects for crypt passwords. Writing the raw `openssl rand -base64`
+# output directly into the config is fragile: rclone must base64-decode the
+# stored value to "reveal" the password, and any mangling (padding, whitespace)
+# makes it fail with "base64 decode failed when revealing password".
 CRYPT_PASSWORD="$(openssl rand -base64 32)"
 CRYPT_PASSWORD2="$(openssl rand -base64 32)"
+OBSCURED_PASSWORD="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD")"
+OBSCURED_PASSWORD2="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD2")"
 
 mkdir -p "$BACKUP_ETC_DIR"
 umask 077
+
+# Preserve the previous config before overwriting: regenerating the crypt
+# passwords makes any previously uploaded (encrypted) backups unreadable.
+if [[ -f "$BACKUP_ETC_DIR/rclone.conf" ]]; then
+  local_backup="$BACKUP_ETC_DIR/rclone.conf.bak.$(date "+%Y.%m.%d-%H.%M.%S")"
+  cp -a "$BACKUP_ETC_DIR/rclone.conf" "$local_backup"
+  chmod 600 "$local_backup"
+  echo "Backed up existing config to $local_backup"
+  echo "WARNING: replacing the crypt passwords will make any existing encrypted"
+  echo "         backups in R2 unreadable. Only proceed if that is expected."
+fi
 
 cat > "$BACKUP_ETC_DIR/rclone.conf" <<EOF
 # rclone configuration for Overleaf backups. Root-only (chmod 600).
@@ -66,8 +84,8 @@ type = crypt
 remote = r2:${R2_BUCKET}
 filename_encryption = standard
 directory_name_encryption = true
-password = ${CRYPT_PASSWORD}
-password2 = ${CRYPT_PASSWORD2}
+password = ${OBSCURED_PASSWORD}
+password2 = ${OBSCURED_PASSWORD2}
 EOF
 
 chmod 600 "$BACKUP_ETC_DIR/rclone.conf"
@@ -94,5 +112,11 @@ echo "    AWS_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=<secret> \\"
 echo "      aws s3api create-bucket --endpoint-url https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com \\"
 echo "      --bucket $R2_BUCKET --region auto --create-bucket-configuration LocationConstraint=EU"
 echo
-echo "Verify connectivity with:"
-echo "  sudo $RCLONE_BIN --config $BACKUP_ETC_DIR/rclone.conf lsd r2-crypt:"
+echo "Verifying the new config (lsd r2-crypt:) ..."
+if "$RCLONE_BIN" --config "$BACKUP_ETC_DIR/rclone.conf" lsd r2-crypt: >/dev/null 2>&1; then
+  echo "OK: can list r2-crypt: - crypt password and credentials are valid."
+else
+  echo "WARNING: could not list r2-crypt: - the rclone config may be invalid, or the"
+  echo "         bucket/token may be wrong. Debug with:"
+  echo "  sudo $RCLONE_BIN --config $BACKUP_ETC_DIR/rclone.conf lsd r2-crypt:"
+fi
