@@ -1,0 +1,11 @@
+# Overleaf backup timer - runs the backup once per day at 03:00.
+[Unit]
+Description=Daily Overleaf backup timer
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

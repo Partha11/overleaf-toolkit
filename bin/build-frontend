@@ -1,0 +1,89 @@
+#! /usr/bin/env bash
+# Rebuild the Overleaf web frontend inside a throwaway container and copy the
+# resulting assets to data/public-build, which is bind-mounted into the running
+# sharelatex container (see overrides/docker-compose.override.yml).
+#
+# This is needed because data/ is gitignored and the frontend bundle is compiled
+# at image build time. The override themes (overrides/github_dark.json) must be
+# compiled into the bundle, so the bundle is rebuilt whenever the image version
+# changes or the custom themes are edited.
+#
+# Usage: bin/build-frontend
+
+set -euo pipefail
+
+#### Detect Toolkit Project Root ####
+command -v realpath >/dev/null 2>&1 || realpath() {
+  [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+SCRIPT_PATH="$(realpath "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+TOOLKIT_ROOT="$(realpath "$SCRIPT_DIR/..")"
+if [[ ! -d "$TOOLKIT_ROOT/bin" ]] || [[ ! -d "$TOOLKIT_ROOT/config" ]]; then
+  echo "ERROR: could not find root of overleaf-toolkit project (inferred project root as '$TOOLKIT_ROOT')"
+  exit 1
+fi
+
+source "$TOOLKIT_ROOT/lib/shared-functions.sh"
+
+function check_config() {
+  if [[ ! -f "$TOOLKIT_ROOT/config/overleaf.rc" ]] \
+      || [[ ! -f "$TOOLKIT_ROOT/config/version" ]]; then
+    echo "Config files not found! Please run bin/init first."
+    exit 1
+  fi
+}
+
+function ensure_build_container() {
+  docker run -d --name "$BUILD_CONTAINER" --entrypoint sleep "$IMAGE" infinity
+}
+
+function main() {
+  read_image_version
+  read_config
+  check_config
+  set_server_pro_image_name "$IMAGE_VERSION"
+  export IMAGE
+
+  BUILD_CONTAINER="overleaf-build-$$"
+  THEME_SRC="/overleaf/services/web/frontend/js/features/source-editor/themes/cm6"
+  PUBLIC_DIR="$TOOLKIT_ROOT/data/public-build"
+  OVERRIDES_DIR="$TOOLKIT_ROOT/overrides"
+
+  if [[ ! -f "$OVERRIDES_DIR/github_dark.json" ]]; then
+    echo "ERROR: $OVERRIDES_DIR/github_dark.json not found"
+    exit 1
+  fi
+
+  echo "Building frontend for image: $IMAGE"
+  echo "Creating build container..."
+  ensure_build_container
+
+  cleanup() {
+    docker rm -f "$BUILD_CONTAINER" >/dev/null 2>&1 || true
+  }
+  trap cleanup EXIT
+
+  echo "Copying custom theme into build container..."
+  docker cp "$OVERRIDES_DIR/github_dark.json" \
+    "$BUILD_CONTAINER:$THEME_SRC/github_dark.json"
+
+  echo "Restoring dev dependencies (yarn install)..."
+  docker exec "$BUILD_CONTAINER" sh -c 'cd /overleaf && yarn install'
+
+  echo "Running webpack production build..."
+  docker exec "$BUILD_CONTAINER" sh -c \
+    'cd /overleaf/services/web && NODE_OPTIONS=--max-old-space-size=6144 yarn run webpack:production'
+
+  echo "Copying built assets to $PUBLIC_DIR ..."
+  mkdir -p "$PUBLIC_DIR"
+  rm -rf "$PUBLIC_DIR"/*
+  docker cp "$BUILD_CONTAINER:/overleaf/services/web/public/." "$PUBLIC_DIR"
+
+  echo "Done."
+  echo
+  echo "Recreate the sharelatex container to pick up the new build:"
+  echo "  bin/docker-compose up -d sharelatex"
+}
+
+main "$@"

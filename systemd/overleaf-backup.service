@@ -1,0 +1,19 @@
+# Overleaf backup service - run by overleaf-backup.timer once per day.
+# Template: __TOOLKIT_ROOT__ is substituted by scripts/install-systemd.sh.
+[Unit]
+Description=Overleaf backup to Cloudflare R2
+Documentation=file://__TOOLKIT_ROOT__/doc/backups.md
+After=docker.service network-online.target
+Wants=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=root
+Environment=TOOLKIT_ROOT=__TOOLKIT_ROOT__
+EnvironmentFile=/etc/overleaf-backup/backup.env
+ExecStart=__TOOLKIT_ROOT__/scripts/backup-overleaf.sh
+TimeoutStartSec=0
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
