@@ -21,6 +21,11 @@ R2_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY:-}"
 R2_BUCKET="${R2_BUCKET:-overleaf}"
 BACKUP_ETC_DIR="${BACKUP_ETC_DIR:-/etc/overleaf-backup}"
 RCLONE_BIN="${RCLONE_BIN:-rclone}"
+# Optional override for the S3 endpoint. Defaults to the account-global
+# endpoint. Use the bucket's regional endpoint (e.g. https://<ACCOUNT_ID>.eu.
+# r2.cloudflarestorage.com for an EU-located bucket) if your bucket lives in a
+# specific R2 region and you want the connection pinned to it.
+R2_ENDPOINT="${R2_ENDPOINT:-}"
 
 command -v "$RCLONE_BIN" >/dev/null || {
   echo "ERROR: rclone is not installed. Install it first, e.g.:"
@@ -41,6 +46,10 @@ prompt R2_ACCOUNT_ID "Cloudflare R2 Account ID (dashboards under R2 -> Account I
 prompt R2_ACCESS_KEY_ID "R2 API Token Access Key ID (bucket-scoped, read+write)"
 prompt R2_SECRET_ACCESS_KEY "R2 API Token Secret Access Key"
 prompt R2_BUCKET "R2 bucket name (dedicated to Overleaf backups)"
+
+if [[ -z "$R2_ENDPOINT" ]]; then
+  R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+fi
 
 # Generate two fresh random secrets for the rclone crypt remote. The values are
 # stored in the config file OBSCURED with `rclone obscure`, which is the format
@@ -75,8 +84,14 @@ type = s3
 provider = Cloudflare
 access_key_id = ${R2_ACCESS_KEY_ID}
 secret_access_key = ${R2_SECRET_ACCESS_KEY}
-endpoint = https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com
+endpoint = ${R2_ENDPOINT}
 region = auto
+# Never auto-create the bucket: rclone would create it in R2's default region
+# (not EU), silently diverting backups away from the intended bucket. The
+# bucket must be created manually first (see the EU Location instructions).
+no_check_bucket = true
+# Belt and braces: if a creation ever slips through, force the EU location.
+location_constraint = EU
 acl = private
 
 [r2-crypt]
@@ -109,7 +124,7 @@ echo "    read & write permissions, and use it for this backup setup."
 echo
 echo "  Option B - aws CLI (creates the bucket in EU):"
 echo "    AWS_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=<secret> \\"
-echo "      aws s3api create-bucket --endpoint-url https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com \\"
+echo "      aws s3api create-bucket --endpoint-url ${R2_ENDPOINT} \\"
 echo "      --bucket $R2_BUCKET --region auto --create-bucket-configuration LocationConstraint=EU"
 echo
 # lsf (not lsd) is used because lsd reports "directory not found" on a fresh,
