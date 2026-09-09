@@ -38,10 +38,27 @@ function ensure_build_container() {
   docker run -d --name "$BUILD_CONTAINER" --entrypoint sleep "$IMAGE" infinity
 }
 
-# Report the package manager to use for the frontend build. Prefer pnpm, then
-# yarn, then npm, whichever is actually available inside the build container.
+# Report the package manager to use for the frontend build. If the repo declares
+# one ("packageManager" field in /overleaf/package.json, e.g. "yarn@4.5.0") and
+# it is present in the image, use it - other managers (pnpm) refuse to run
+# against a project with a different declared manager. Otherwise fall back to
+# probing pnpm, then yarn, then npm.
 function detect_package_manager() {
-  local pkg
+  local declared pkg
+  declared="$(
+    docker exec "$BUILD_CONTAINER" node -e \
+      "try { const p = require('/overleaf/package.json'); console.log((p.packageManager || '').split('@')[0]) } catch (e) {}" \
+      2>/dev/null || true
+  )"
+  if [[ -n "$declared" ]]; then
+    if docker exec "$BUILD_CONTAINER" sh -c "command -v $declared" >/dev/null 2>&1; then
+      echo "$declared"
+      return 0
+    fi
+    echo "ERROR: /overleaf/package.json declares '$declared' but it is not" >&2
+    echo "  installed in image $IMAGE. Install it or use a different image." >&2
+    return 1
+  fi
   for pkg in pnpm yarn npm; do
     if docker exec "$BUILD_CONTAINER" sh -c "command -v $pkg" >/dev/null 2>&1; then
       echo "$pkg"
