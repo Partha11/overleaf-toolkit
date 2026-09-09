@@ -129,6 +129,19 @@ function main() {
 
   echo "Copying built assets to $PUBLIC_DIR ..."
   mkdir -p "$PUBLIC_DIR"
+  # docker-compose creates missing bind-mount targets as root (see
+  # config/docker-compose.override.yml), which blocks the copy below. Reclaim
+  # ownership of public-build only; mongo/redis/overleaf data dirs are
+  # intentionally owned by their service users and are left untouched.
+  if [[ ! -w "$PUBLIC_DIR" ]]; then
+    echo "Fixing ownership of $PUBLIC_DIR (currently root-owned)..."
+    if ! sudo -n chown -R "$(id -u):$(id -g)" "$PUBLIC_DIR" 2>/dev/null; then
+      echo "ERROR: $PUBLIC_DIR is not writable by user $(id -u)" >&2
+      echo "  and passwordless sudo is unavailable. Fix ownership first:" >&2
+      echo "  sudo chown -R $(id -u):$(id -g) $PUBLIC_DIR" >&2
+      exit 1
+    fi
+  fi
   rm -rf "$PUBLIC_DIR"/*
   docker cp "$BUILD_CONTAINER:/overleaf/services/web/public/." "$PUBLIC_DIR"
 
