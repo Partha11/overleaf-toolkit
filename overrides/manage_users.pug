@@ -1,0 +1,572 @@
+extends ../../../../../app/views/layout-marketing
+include ../../../../../app/views/_mixins/material_symbol
+
+block content
+	#main-content.content.content-alt
+		.container.py-4
+			//- Page Header
+			.d-flex.justify-content-between.align-items-center.mb-4
+				div
+					h1.mb-1 Manage Users
+					p.text-muted.mb-0 Overleaf administration, user accounts & access control
+				div
+					a.btn.btn-admin-nav(href='/admin')
+						+material-symbol('settings', 'me-1')
+						| Manage Site
+
+			//- Flash message container
+			#flash-container
+
+			//- Stat Cards
+			.row.g-3.mb-4
+				.col-sm-6.col-lg-3
+					.card.shadow-sm.border-0.h-100
+						.card-body.d-flex.align-items-center
+							.rounded-circle.p-3.bg-primary.bg-opacity-10.text-primary.me-3.d-flex.align-items-center.justify-content-center(style="width: 48px; height: 48px;")
+								+material-symbol('group')
+							div
+								.text-muted.small.text-uppercase.fw-semibold Total Users
+								.fs-4.fw-bold#stat-total= users.length
+				.col-sm-6.col-lg-3
+					.card.shadow-sm.border-0.h-100
+						.card-body.d-flex.align-items-center
+							.rounded-circle.p-3.bg-success.bg-opacity-10.text-success.me-3.d-flex.align-items-center.justify-content-center(style="width: 48px; height: 48px;")
+								+material-symbol('check_circle')
+							div
+								.text-muted.small.text-uppercase.fw-semibold Active Users
+								.fs-4.fw-bold#stat-active= users.filter(u => u.loginCount > 0).length
+				.col-sm-6.col-lg-3
+					.card.shadow-sm.border-0.h-100
+						.card-body.d-flex.align-items-center
+							.rounded-circle.p-3.bg-warning.bg-opacity-10.text-warning.me-3.d-flex.align-items-center.justify-content-center(style="width: 48px; height: 48px;")
+								+material-symbol('pending')
+							div
+								.text-muted.small.text-uppercase.fw-semibold Pending Activation
+								.fs-4.fw-bold#stat-pending= users.filter(u => !u.loginCount || u.loginCount === 0).length
+				.col-sm-6.col-lg-3
+					.card.shadow-sm.border-0.h-100
+						.card-body.d-flex.align-items-center
+							.rounded-circle.p-3.bg-info.bg-opacity-10.text-info.me-3.d-flex.align-items-center.justify-content-center(style="width: 48px; height: 48px;")
+								+material-symbol('shield_person')
+							div
+								.text-muted.small.text-uppercase.fw-semibold Administrators
+								.fs-4.fw-bold#stat-admins= users.filter(u => u.isAdmin).length
+
+			//- Registration Card
+			.card.shadow-sm.border-0.mb-4
+				.card-header.bg-transparent.py-3.border-bottom.d-flex.justify-content-between.align-items-center
+					h5.mb-0.d-flex.align-items-center
+						+material-symbol('person_add', 'me-2 text-primary')
+						| Register New Users
+					button.btn.btn-sm.btn-link.text-decoration-none(
+						type='button'
+						data-bs-toggle='collapse'
+						data-bs-target='#register-collapse'
+						aria-expanded='true'
+						aria-controls='register-collapse'
+					) Toggle
+				#register-collapse.collapse.show
+					.card-body
+						form#register-form
+							input(name='_csrf' type='hidden' value=csrfToken)
+							.mb-3
+								label.form-label.fw-semibold(for='register-emails') Email Addresses
+								.row.g-2
+									.col-md-9
+										input#register-emails.form-control(
+											type='text'
+											name='email'
+											placeholder='colleague@example.com, student@example.com'
+											required
+										)
+									.col-md-3
+										button#btn-register.btn.btn-primary.w-100.d-flex.align-items-center.justify-content-center(type='submit')
+											span.spinner-border.spinner-border-sm.me-2.d-none#register-spinner(role='status')
+											| Register Users
+								.form-text.mt-1 Enter comma, space, or newline separated email addresses. Welcome emails will be queued, and activation links will be generated below.
+
+						#register-results.mt-3.d-none
+							.alert.alert-success.py-2.mb-3
+								strong Registration successful!
+								|  If welcome emails are not configured, share the one-time activation links below:
+							.table-responsive
+								table.table.table-sm.table-bordered.align-middle
+									thead.table-light
+										tr
+											th Email
+											th Activation / Set Password Link
+											th(style="width: 120px") Copy
+									tbody#register-results-body
+
+			//- Existing Users Table Card
+			.card.shadow-sm.border-0.mb-5
+				.card-header.bg-transparent.py-3.border-bottom
+					.row.g-2.align-items-center
+						.col-md-5
+							h5.mb-0.d-flex.align-items-center
+								+material-symbol('group', 'me-2 text-secondary')
+								| Registered Users
+								span.badge.bg-secondary.ms-2#filtered-count= users.length
+						.col-md-4
+							.input-group.input-group-sm
+								span.input-group-text
+									+material-symbol('search')
+								input#user-search.form-control(
+									type='text'
+									placeholder='Search by email or name...'
+								)
+						.col-md-3
+							select#filter-role.form-select.form-select-sm
+								option(value='all') All Users
+								option(value='admin') Admins Only
+								option(value='user') Non-Admins
+								option(value='active') Active Users
+								option(value='pending') Pending Activation
+
+				.card-body.p-0
+					.table-responsive
+						table.table.table-hover.align-middle.mb-0#users-table
+							thead.table-light
+								tr
+									th User
+									th Email
+									th Role
+									th Status
+									th Registered
+									th Last Login
+									th.text-end Actions
+							tbody#users-tbody
+								each u in users
+									- const isCurrent = currentUser && ((currentUser._id && currentUser._id.toString() == u._id.toString()) || (currentUser.id && currentUser.id.toString() == u._id.toString()))
+									- const fullName = (u.first_name || u.last_name) ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : '–'
+									- const isPending = !u.loginCount || u.loginCount === 0
+									- const userInitial = (u.first_name ? u.first_name[0] : (u.email ? u.email[0].toUpperCase() : '?'))
+									tr(
+										id=`user-row-${u._id}`
+										data-user-id=u._id
+										data-email=u.email.toLowerCase()
+										data-name=fullName.toLowerCase()
+										data-is-admin=u.isAdmin ? 'true' : 'false'
+										data-is-pending=isPending ? 'true' : 'false'
+									)
+										td
+											.d-flex.align-items-center
+												.user-avatar.me-2= userInitial
+												div
+													.fw-semibold= fullName
+													if isCurrent
+														span.badge.bg-info.bg-opacity-10.text-info-emphasis.border.border-info-subtle.small You
+										td
+											span.fw-medium.user-email-text= u.email
+										td
+											if u.isAdmin
+												span.badge.bg-primary.role-badge Admin
+											else
+												span.badge.bg-secondary.bg-opacity-25.text-dark.role-badge User
+										td
+											if isPending
+												span.badge.bg-warning.text-dark.status-badge Pending
+											else
+												span.badge.bg-success.status-badge Active
+										td.small.text-muted= moment(u.signUpDate).format('YYYY-MM-DD HH:mm')
+										td.small.text-muted= u.lastLoggedIn ? moment(u.lastLoggedIn).format('YYYY-MM-DD HH:mm') : (u.loginCount > 0 ? 'Active' : 'Never')
+										td.text-end
+											.btn-group.btn-group-sm
+												button.btn.btn-outline-secondary.btn-reset-link(
+													type='button'
+													data-user-id=u._id
+													data-email=u.email
+													title='Generate activation / password reset link'
+												)
+													+material-symbol('key', 'me-1')
+													| Link
+												if !isCurrent
+													button.btn.btn-outline-secondary.btn-toggle-admin(
+														type='button'
+														data-user-id=u._id
+														data-is-admin=u.isAdmin ? 'true' : 'false'
+														title=u.isAdmin ? 'Revoke admin privileges' : 'Promote to admin'
+													)= u.isAdmin ? 'Demote' : 'Make Admin'
+													button.btn.btn-outline-danger.btn-delete-user(
+														type='button'
+														data-user-id=u._id
+														data-email=u.email
+														title='Delete user account and their projects'
+													)
+														+material-symbol('delete')
+
+					#no-users-message.p-4.text-center.text-muted.d-none
+						+material-symbol('search_off', 'fs-2 d-block mb-2')
+						| No users matching your filter.
+
+	style.
+		.user-avatar {
+			width: 34px;
+			height: 34px;
+			border-radius: 50%;
+			background: #e9ecef;
+			color: #495057;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 600;
+			font-size: 14px;
+			flex-shrink: 0;
+		}
+		.material-symbols {
+			font-size: 18px;
+			vertical-align: text-bottom;
+		}
+		/* Fix Overleaf's default .btn-outline-secondary being white-on-white on light pages */
+		#main-content .btn-outline-secondary {
+			--bs-btn-color: #24292f;
+			--bs-btn-border-color: #d0d7de;
+			--bs-btn-hover-color: #24292f;
+			--bs-btn-hover-bg: #f3f4f6;
+			--bs-btn-hover-border-color: #afb8c1;
+			--bs-btn-active-color: #24292f;
+			--bs-btn-active-bg: #ebecf0;
+			--bs-btn-active-border-color: #afb8c1;
+			color: #24292f;
+			border-color: #d0d7de;
+			background-color: #ffffff;
+		}
+		#main-content .btn-outline-secondary:hover {
+			color: #24292f;
+			background-color: #f3f4f6;
+			border-color: #afb8c1;
+		}
+		/* Dedicated style for admin header navigation button */
+		.btn-admin-nav {
+			display: inline-flex;
+			align-items: center;
+			font-weight: 500;
+			font-size: 0.95rem;
+			color: #1b222c !important;
+			background-color: #ffffff !important;
+			border: 1px solid #c9d1d9 !important;
+			padding: 0.45rem 0.9rem;
+			border-radius: 6px;
+			text-decoration: none;
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+			transition: all 0.15s ease-in-out;
+		}
+		.btn-admin-nav:hover {
+			background-color: #f6f8fa !important;
+			border-color: #098842 !important;
+			color: #098842 !important;
+			text-decoration: none;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+		}
+		.btn-admin-nav .material-symbols {
+			font-size: 19px;
+			transition: transform 0.25s ease;
+		}
+		.btn-admin-nav:hover .material-symbols {
+			transform: rotate(35deg);
+		}
+
+	script.
+		(function() {
+			const csrfToken = document.querySelector('input[name="_csrf"]')?.value || '';
+
+			function showFlash(type, message) {
+				const container = document.getElementById('flash-container');
+				if (!container) return;
+				container.innerHTML = `
+					<div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+						${message}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				`;
+				setTimeout(() => {
+					const alert = container.querySelector('.alert');
+					if (alert) alert.classList.remove('show');
+				}, 6000);
+			}
+
+			function copyToClipboard(text, btn) {
+				const done = () => {
+					if (btn) {
+						const originalHtml = btn.innerHTML;
+						const wasPrimary = btn.classList.contains('btn-outline-primary');
+						btn.innerHTML = 'Copied!';
+						btn.classList.add('btn-success');
+						btn.classList.remove('btn-outline-secondary', 'btn-outline-primary');
+						setTimeout(() => {
+							btn.innerHTML = originalHtml;
+							btn.classList.remove('btn-success');
+							btn.classList.add(wasPrimary ? 'btn-outline-primary' : 'btn-outline-secondary');
+						}, 2000);
+					}
+					showFlash('success', 'Activation link copied to clipboard!');
+				};
+
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+				} else {
+					fallbackCopy(text, done);
+				}
+			}
+
+			function fallbackCopy(text, cb) {
+				const textArea = document.createElement('textarea');
+				textArea.value = text;
+				textArea.style.position = 'fixed';
+				textArea.style.left = '-9999px';
+				document.body.appendChild(textArea);
+				textArea.select();
+				try {
+					document.execCommand('copy');
+					cb();
+				} catch (err) {
+					prompt('Copy link:', text);
+				}
+				document.body.removeChild(textArea);
+			}
+
+			function updateStats() {
+				const rows = Array.from(document.querySelectorAll('#users-tbody tr[data-user-id]'));
+				const total = rows.length;
+				let active = 0, pending = 0, admins = 0;
+				rows.forEach(r => {
+					if (r.getAttribute('data-is-admin') === 'true') admins++;
+					if (r.getAttribute('data-is-pending') === 'true') pending++;
+					else active++;
+				});
+				const elTotal = document.getElementById('stat-total');
+				const elActive = document.getElementById('stat-active');
+				const elPending = document.getElementById('stat-pending');
+				const elAdmins = document.getElementById('stat-admins');
+				if (elTotal) elTotal.textContent = total;
+				if (elActive) elActive.textContent = active;
+				if (elPending) elPending.textContent = pending;
+				if (elAdmins) elAdmins.textContent = admins;
+				filterUsers();
+			}
+
+			function filterUsers() {
+				const search = (document.getElementById('user-search')?.value || '').toLowerCase().trim();
+				const roleFilter = document.getElementById('filter-role')?.value || 'all';
+				const rows = document.querySelectorAll('#users-tbody tr[data-user-id]');
+				let visibleCount = 0;
+
+				rows.forEach(row => {
+					const email = row.getAttribute('data-email') || '';
+					const name = row.getAttribute('data-name') || '';
+					const isAdmin = row.getAttribute('data-is-admin') === 'true';
+					const isPending = row.getAttribute('data-is-pending') === 'true';
+
+					const matchesSearch = !search || email.includes(search) || name.includes(search);
+					let matchesFilter = true;
+					if (roleFilter === 'admin') matchesFilter = isAdmin;
+					else if (roleFilter === 'user') matchesFilter = !isAdmin;
+					else if (roleFilter === 'active') matchesFilter = !isPending;
+					else if (roleFilter === 'pending') matchesFilter = isPending;
+
+					if (matchesSearch && matchesFilter) {
+						row.style.display = '';
+						visibleCount++;
+					} else {
+						row.style.display = 'none';
+					}
+				});
+
+				const counter = document.getElementById('filtered-count');
+				if (counter) counter.textContent = visibleCount;
+				const noUsersMsg = document.getElementById('no-users-message');
+				if (noUsersMsg) {
+					if (visibleCount === 0) noUsersMsg.classList.remove('d-none');
+					else noUsersMsg.classList.add('d-none');
+				}
+			}
+
+			document.getElementById('user-search')?.addEventListener('input', filterUsers);
+			document.getElementById('filter-role')?.addEventListener('change', filterUsers);
+
+			// Handle actions on users table
+			document.getElementById('users-tbody')?.addEventListener('click', async function(e) {
+				const btnReset = e.target.closest('.btn-reset-link');
+				const btnToggle = e.target.closest('.btn-toggle-admin');
+				const btnDelete = e.target.closest('.btn-delete-user');
+
+				if (btnReset) {
+					const userId = btnReset.getAttribute('data-user-id');
+					btnReset.disabled = true;
+					try {
+						const res = await fetch(`/admin/user/${userId}/reset-password`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-Csrf-Token': csrfToken
+							},
+							body: JSON.stringify({ _csrf: csrfToken })
+						});
+						const data = await res.json();
+						if (data.success && data.setNewPasswordUrl) {
+							copyToClipboard(data.setNewPasswordUrl, btnReset);
+						} else {
+							showFlash('danger', data.error || 'Failed to generate link.');
+						}
+					} catch (err) {
+						showFlash('danger', 'Error generating link.');
+					} finally {
+						btnReset.disabled = false;
+					}
+				} else if (btnToggle) {
+					const userId = btnToggle.getAttribute('data-user-id');
+					const currentIsAdmin = btnToggle.getAttribute('data-is-admin') === 'true';
+					const actionName = currentIsAdmin ? 'Demote from admin' : 'Promote to admin';
+					if (!confirm(`Are you sure you want to ${actionName}?`)) return;
+
+					btnToggle.disabled = true;
+					try {
+						const res = await fetch(`/admin/user/${userId}/toggle-admin`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-Csrf-Token': csrfToken
+							},
+							body: JSON.stringify({ _csrf: csrfToken })
+						});
+						const data = await res.json();
+						if (data.success) {
+							const row = document.getElementById(`user-row-${userId}`);
+							const newAdmin = data.isAdmin;
+							row.setAttribute('data-is-admin', newAdmin ? 'true' : 'false');
+							btnToggle.setAttribute('data-is-admin', newAdmin ? 'true' : 'false');
+							btnToggle.textContent = newAdmin ? 'Demote' : 'Make Admin';
+
+							const roleBadge = row.querySelector('.role-badge');
+							if (roleBadge) {
+								if (newAdmin) {
+									roleBadge.className = 'badge bg-primary role-badge';
+									roleBadge.textContent = 'Admin';
+								} else {
+									roleBadge.className = 'badge bg-secondary bg-opacity-25 text-dark role-badge';
+									roleBadge.textContent = 'User';
+								}
+							}
+							updateStats();
+							showFlash('success', `User privileges updated successfully.`);
+						} else {
+							showFlash('danger', data.error || 'Failed to update privileges.');
+						}
+					} catch (err) {
+						showFlash('danger', 'Error updating admin privileges.');
+					} finally {
+						btnToggle.disabled = false;
+					}
+				} else if (btnDelete) {
+					const userId = btnDelete.getAttribute('data-user-id');
+					const email = btnDelete.getAttribute('data-email');
+					if (!confirm(`WARNING: Are you sure you want to delete user ${email}?\n\nAll projects owned by this user will also be permanently deleted!`)) return;
+
+					btnDelete.disabled = true;
+					try {
+						const res = await fetch(`/admin/user/${userId}/delete`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-Csrf-Token': csrfToken
+							},
+							body: JSON.stringify({ _csrf: csrfToken })
+						});
+						const data = await res.json();
+						if (data.success) {
+							const row = document.getElementById(`user-row-${userId}`);
+							if (row) {
+								row.remove();
+								updateStats();
+							}
+							showFlash('success', `User ${email} and their projects have been deleted.`);
+						} else {
+							showFlash('danger', data.error || 'Failed to delete user.');
+						}
+					} catch (err) {
+						showFlash('danger', 'Error deleting user.');
+					} finally {
+						btnDelete.disabled = false;
+					}
+				}
+			});
+
+			// Handle Registration Form
+			document.getElementById('register-form')?.addEventListener('submit', async function(e) {
+				e.preventDefault();
+				const input = document.getElementById('register-emails');
+				const emails = input?.value || '';
+				if (!emails.trim()) return;
+
+				const btn = document.getElementById('btn-register');
+				const spinner = document.getElementById('register-spinner');
+				btn.disabled = true;
+				spinner?.classList.remove('d-none');
+
+				try {
+					const res = await fetch('/admin/register', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-Csrf-Token': csrfToken
+						},
+						body: JSON.stringify({ emails, _csrf: csrfToken })
+					});
+					const data = await res.json();
+					const resultsBox = document.getElementById('register-results');
+					const resultsBody = document.getElementById('register-results-body');
+
+					if (data.results && data.results.length > 0) {
+						resultsBody.innerHTML = '';
+						data.results.forEach(item => {
+							const tr = document.createElement('tr');
+							if (item.success) {
+								tr.innerHTML = `
+									<td><strong>${item.email}</strong></td>
+									<td class="small font-monospace text-break">${item.setNewPasswordUrl || '–'}</td>
+									<td>
+										${item.setNewPasswordUrl ? `<button type="button" class="btn btn-sm btn-outline-primary btn-copy-link" data-url="${item.setNewPasswordUrl}">Copy Link</button>` : ''}
+									</td>
+								`;
+							} else {
+								tr.innerHTML = `
+									<td><strong>${item.email}</strong></td>
+									<td colspan="2" class="text-danger small">${item.error || 'Registration failed'}</td>
+								`;
+							}
+							resultsBody.appendChild(tr);
+						});
+						resultsBox.classList.remove('d-none');
+						showFlash('success', `Registration completed for ${data.results.filter(r => r.success).length} user(s). Refreshing table...`);
+						setTimeout(() => window.location.reload(), 1800);
+					} else if (data.email && data.setNewPasswordUrl) {
+						resultsBody.innerHTML = `
+							<tr>
+								<td><strong>${data.email}</strong></td>
+								<td class="small font-monospace text-break">${data.setNewPasswordUrl}</td>
+								<td><button type="button" class="btn btn-sm btn-outline-primary btn-copy-link" data-url="${data.setNewPasswordUrl}">Copy Link</button></td>
+							</tr>
+						`;
+						resultsBox.classList.remove('d-none');
+						showFlash('success', `User ${data.email} registered. Refreshing table...`);
+						setTimeout(() => window.location.reload(), 1800);
+					} else {
+						showFlash('danger', data.error || 'Failed to register users.');
+					}
+				} catch (err) {
+					showFlash('danger', 'Error registering users.');
+				} finally {
+					btn.disabled = false;
+					spinner?.classList.add('d-none');
+				}
+			});
+
+			// Copy links from registration results
+			document.getElementById('register-results-body')?.addEventListener('click', function(e) {
+				const btn = e.target.closest('.btn-copy-link');
+				if (btn) {
+					const url = btn.getAttribute('data-url');
+					if (url) copyToClipboard(url, btn);
+				}
+			});
+		})();

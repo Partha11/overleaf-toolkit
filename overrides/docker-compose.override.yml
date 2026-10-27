@@ -7,5 +7,8 @@ services:
             - ../overrides/settings-ce.js:/etc/overleaf/settings.js:ro
             - ../overrides/ProjectEditorHandler.mjs:/overleaf/services/web/app/src/Features/Project/ProjectEditorHandler.mjs:ro
             - ../overrides/ProjectController.mjs:/overleaf/services/web/app/src/Features/Project/ProjectController.mjs:ro
+            - ../overrides/UserActivateController.mjs:/overleaf/services/web/modules/user-activate/app/src/UserActivateController.mjs:ro
+            - ../overrides/UserActivateRouter.mjs:/overleaf/services/web/modules/user-activate/app/src/UserActivateRouter.mjs:ro
+            - ../overrides/manage_users.pug:/overleaf/services/web/modules/user-activate/app/views/user/manage_users.pug:ro
             - ../overrides/github_dark.json:/overleaf/services/web/frontend/js/features/source-editor/themes/cm6/github_dark.json:ro
             - ../data/public-build:/overleaf/services/web/public:ro
