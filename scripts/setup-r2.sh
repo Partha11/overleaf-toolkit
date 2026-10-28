@@ -10,7 +10,10 @@
 # are encrypted client-side before reaching R2.
 #
 # Secrets may be provided via environment variables (R2_ACCOUNT_ID,
-# R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET) or interactively.
+# R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, CRYPT_PASSWORD,
+# CRYPT_PASSWORD2) or interactively. If an rclone config already exists,
+# existing crypt encryption passwords are automatically preserved to prevent
+# invalidating historical backups (pass --rotate-crypt-keys to override).
 # Nothing secret is written anywhere except the root-only rclone.conf.
 
 set -euo pipefail
@@ -26,6 +29,30 @@ RCLONE_BIN="${RCLONE_BIN:-rclone}"
 # r2.cloudflarestorage.com for an EU-located bucket) if your bucket lives in a
 # specific R2 region and you want the connection pinned to it.
 R2_ENDPOINT="${R2_ENDPOINT:-}"
+CRYPT_PASSWORD="${CRYPT_PASSWORD:-}"
+CRYPT_PASSWORD2="${CRYPT_PASSWORD2:-}"
+OBSCURED_PASSWORD="${OBSCURED_PASSWORD:-}"
+OBSCURED_PASSWORD2="${OBSCURED_PASSWORD2:-}"
+ROTATE_CRYPT_KEYS=0
+
+case "${1:-}" in
+  --rotate-crypt-keys|--new-crypt-keys)
+    ROTATE_CRYPT_KEYS=1
+    ;;
+  -h|--help)
+    echo "Usage: sudo scripts/setup-r2.sh [OPTIONS]"
+    echo ""
+    echo "Configure rclone for Overleaf backups to Cloudflare R2."
+    echo "Existing encryption passwords in rclone.conf are preserved by default"
+    echo "so previously uploaded backups remain decryptable and valid."
+    echo ""
+    echo "Options:"
+    echo "  --rotate-crypt-keys    Force generation of fresh encryption passwords."
+    echo "                         WARNING: Makes existing R2 backups permanently unreadable!"
+    echo "  -h, --help             Show this help message."
+    exit 0
+    ;;
+esac
 
 command -v "$RCLONE_BIN" >/dev/null || {
   echo "ERROR: rclone is not installed. Install it first, e.g.:"
@@ -34,6 +61,39 @@ command -v "$RCLONE_BIN" >/dev/null || {
   exit 1
 }
 [[ "$(id -u)" == "0" ]] || { echo "ERROR: run this script as root (it writes $BACKUP_ETC_DIR)." >&2; exit 1; }
+
+# Inspect existing configuration if present to avoid revoking secrets or prompting needlessly
+EXISTING_KEY_ID=""
+EXISTING_SECRET_KEY=""
+EXISTING_ENDPOINT=""
+EXISTING_BUCKET=""
+EXISTING_OBSCURED_PASSWORD=""
+EXISTING_OBSCURED_PASSWORD2=""
+
+if [[ -f "$BACKUP_ETC_DIR/rclone.conf" ]]; then
+  EXISTING_KEY_ID="$(awk -F ' = ' '/^\[r2\]/{f=1} f && /^access_key_id = /{print $2; exit}' "$BACKUP_ETC_DIR/rclone.conf" 2>/dev/null || true)"
+  EXISTING_SECRET_KEY="$(awk -F ' = ' '/^\[r2\]/{f=1} f && /^secret_access_key = /{print $2; exit}' "$BACKUP_ETC_DIR/rclone.conf" 2>/dev/null || true)"
+  EXISTING_ENDPOINT="$(awk -F ' = ' '/^\[r2\]/{f=1} f && /^endpoint = /{print $2; exit}' "$BACKUP_ETC_DIR/rclone.conf" 2>/dev/null || true)"
+  EXISTING_REMOTE="$(awk -F ' = ' '/^\[r2-crypt\]/{f=1} f && /^remote = /{print $2; exit}' "$BACKUP_ETC_DIR/rclone.conf" 2>/dev/null || true)"
+  if [[ -n "$EXISTING_REMOTE" && "$EXISTING_REMOTE" == r2:* ]]; then
+    EXISTING_BUCKET="${EXISTING_REMOTE#r2:}"
+  fi
+  EXISTING_OBSCURED_PASSWORD="$(awk -F ' = ' '/^\[r2-crypt\]/{f=1} f && /^password = /{print $2; exit}' "$BACKUP_ETC_DIR/rclone.conf" 2>/dev/null || true)"
+  EXISTING_OBSCURED_PASSWORD2="$(awk -F ' = ' '/^\[r2-crypt\]/{f=1} f && /^password2 = /{print $2; exit}' "$BACKUP_ETC_DIR/rclone.conf" 2>/dev/null || true)"
+fi
+
+# Pre-populate defaults from existing config if not supplied in environment
+[[ -z "$R2_ACCESS_KEY_ID" && -n "$EXISTING_KEY_ID" ]] && R2_ACCESS_KEY_ID="$EXISTING_KEY_ID"
+[[ -z "$R2_SECRET_ACCESS_KEY" && -n "$EXISTING_SECRET_KEY" ]] && R2_SECRET_ACCESS_KEY="$EXISTING_SECRET_KEY"
+[[ -z "$R2_ENDPOINT" && -n "$EXISTING_ENDPOINT" ]] && R2_ENDPOINT="$EXISTING_ENDPOINT"
+if [[ ( -z "$R2_BUCKET" || "$R2_BUCKET" == "overleaf" ) && -n "$EXISTING_BUCKET" ]]; then
+  R2_BUCKET="$EXISTING_BUCKET"
+fi
+if [[ -z "$R2_ACCOUNT_ID" && -n "$R2_ENDPOINT" ]]; then
+  if [[ "$R2_ENDPOINT" =~ https://([a-zA-Z0-9_-]+)\. ]]; then
+    R2_ACCOUNT_ID="${BASH_REMATCH[1]}"
+  fi
+fi
 
 prompt() { # prompt VARNAME LABEL
   local varname="$1" label="$2"
@@ -51,29 +111,50 @@ if [[ -z "$R2_ENDPOINT" ]]; then
   R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 fi
 
-# Generate two fresh random secrets for the rclone crypt remote. The values are
-# stored in the config file OBSCURED with `rclone obscure`, which is the format
-# rclone expects for crypt passwords. Writing the raw `openssl rand -base64`
-# output directly into the config is fragile: rclone must base64-decode the
-# stored value to "reveal" the password, and any mangling (padding, whitespace)
-# makes it fail with "base64 decode failed when revealing password".
-CRYPT_PASSWORD="$(openssl rand -base64 32)"
-CRYPT_PASSWORD2="$(openssl rand -base64 32)"
-OBSCURED_PASSWORD="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD")"
-OBSCURED_PASSWORD2="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD2")"
+# Determine crypt passwords:
+# - Use environment variables if supplied
+# - Otherwise, PRESERVE existing crypt secrets if present (prevents revoking old backups)
+# - Only generate fresh random secrets if no keys exist or --rotate-crypt-keys was passed
+if [[ -n "$OBSCURED_PASSWORD" && -n "$OBSCURED_PASSWORD2" ]]; then
+  echo "Using obscured crypt passwords from environment."
+elif [[ -n "$CRYPT_PASSWORD" && -n "$CRYPT_PASSWORD2" ]]; then
+  echo "Obscuring crypt passwords from environment..."
+  OBSCURED_PASSWORD="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD")"
+  OBSCURED_PASSWORD2="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD2")"
+elif [[ -n "$EXISTING_OBSCURED_PASSWORD" && -n "$EXISTING_OBSCURED_PASSWORD2" && "$ROTATE_CRYPT_KEYS" != "1" ]]; then
+  echo "Preserving existing rclone crypt passwords from $BACKUP_ETC_DIR/rclone.conf."
+  echo "This ensures previously uploaded backups in R2 remain decryptable and valid."
+  echo "(Pass --rotate-crypt-keys if you intentionally want to generate new encryption keys.)"
+  OBSCURED_PASSWORD="$EXISTING_OBSCURED_PASSWORD"
+  OBSCURED_PASSWORD2="$EXISTING_OBSCURED_PASSWORD2"
+else
+  if [[ "$ROTATE_CRYPT_KEYS" == "1" && -n "$EXISTING_OBSCURED_PASSWORD" ]]; then
+    echo "WARNING: Generating new crypt passwords as requested by --rotate-crypt-keys."
+    echo "         This will permanently prevent decrypting existing R2 backups!"
+  else
+    echo "Generating fresh random secrets for the rclone crypt remote..."
+  fi
+  # Generate two fresh random secrets for the rclone crypt remote. The values are
+  # stored in the config file OBSCURED with `rclone obscure`, which is the format
+  # rclone expects for crypt passwords. Writing the raw `openssl rand -base64`
+  # output directly into the config is fragile: rclone must base64-decode the
+  # stored value to "reveal" the password, and any mangling (padding, whitespace)
+  # makes it fail with "base64 decode failed when revealing password".
+  CRYPT_PASSWORD="$(openssl rand -base64 32)"
+  CRYPT_PASSWORD2="$(openssl rand -base64 32)"
+  OBSCURED_PASSWORD="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD")"
+  OBSCURED_PASSWORD2="$("$RCLONE_BIN" obscure "$CRYPT_PASSWORD2")"
+fi
 
 mkdir -p "$BACKUP_ETC_DIR"
 umask 077
 
-# Preserve the previous config before overwriting: regenerating the crypt
-# passwords makes any previously uploaded (encrypted) backups unreadable.
+# Preserve a timestamped backup copy of any previous config before writing:
 if [[ -f "$BACKUP_ETC_DIR/rclone.conf" ]]; then
   local_backup="$BACKUP_ETC_DIR/rclone.conf.bak.$(date "+%Y.%m.%d-%H.%M.%S")"
   cp -a "$BACKUP_ETC_DIR/rclone.conf" "$local_backup"
   chmod 600 "$local_backup"
-  echo "Backed up existing config to $local_backup"
-  echo "WARNING: replacing the crypt passwords will make any existing encrypted"
-  echo "         backups in R2 unreadable. Only proceed if that is expected."
+  echo "Backed up previous config to $local_backup"
 fi
 
 cat > "$BACKUP_ETC_DIR/rclone.conf" <<EOF

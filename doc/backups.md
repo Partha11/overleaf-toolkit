@@ -56,13 +56,15 @@ remote.
 
 ## Retention
 
-Policy (configurable): **7 daily, 4 weekly, 6 monthly** distinct restore points.
+Policy (configurable): **3 daily** restore points kept on R2 (and 3 locally).
+Older backups are pruned from R2 by `retention_pass`. Weekly and monthly rotation
+tiers can be enabled by setting `RETENTION_WEEKLY` and `RETENTION_MONTHLY` in `backup.env`.
 The retention pass runs after every upload, **only inside the dedicated bucket
 path** (`r2-crypt:overleaf/`):
 
-1. **Monthly**: newest backup of each of the last 6 calendar months → `monthly/`.
-2. **Weekly**: newest backup of each of the last 4 ISO weeks → `weekly/`.
-3. **Daily**: 7 newest remaining → `daily/`; everything else deleted.
+1. **Monthly**: newest backup of each of the last `RETENTION_MONTHLY` calendar months → `monthly/` (default: 0 / disabled).
+2. **Weekly**: newest backup of each of the last `RETENTION_WEEKLY` ISO weeks → `weekly/` (default: 0 / disabled).
+3. **Daily**: backups spanning the newest `RETENTION_DAILY` days → `daily/` (default: 3); everything else deleted.
 
 Each archive exists in exactly one prefix (moved, never duplicated). Remote
 layout: `overleaf/{daily,weekly,monthly}/`.
@@ -211,6 +213,8 @@ so all existing sessions are invalidated and users must log in again.
 - Backup scripts run from the host, never inside the Overleaf containers.
 - Secrets (`rclone.conf`, `backup.env`) live in root-only
   `/etc/overleaf-backup/` and are never committed or logged.
+- Crypt encryption passwords are automatically preserved across `scripts/setup-r2.sh` runs
+  so rerunning setup or restarting the service never revokes secrets or breaks existing backups.
 - Retention deletion is limited to `r2-crypt:overleaf/` — it cannot affect
   other buckets or paths.
 
@@ -218,4 +222,4 @@ so all existing sessions are invalidated and users must log in again.
 
 Backups contain only MongoDB, a small Redis dump, `history/` blobs and config —
 no compiles/caches/tmps. `zstd -19` keeps the archive small. R2 charges for
-storage + class-A/B operations only; ~17 objects retained plus monthly growth.
+storage + class-A/B operations only; ~3 daily objects retained by default.

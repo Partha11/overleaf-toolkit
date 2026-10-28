@@ -34,9 +34,9 @@ RCLONE_BIN="${RCLONE_BIN:-rclone}"
 RCLONE_CONFIG="${RCLONE_CONFIG:-/etc/overleaf-backup/rclone.conf}"
 RCLONE_REMOTE="${RCLONE_REMOTE:-r2-crypt}"
 R2_BACKUP_PATH="${R2_BACKUP_PATH:-overleaf}"
-RETENTION_DAILY="${RETENTION_DAILY:-7}"
-RETENTION_WEEKLY="${RETENTION_WEEKLY:-4}"
-RETENTION_MONTHLY="${RETENTION_MONTHLY:-6}"
+RETENTION_DAILY="${RETENTION_DAILY:-3}"
+RETENTION_WEEKLY="${RETENTION_WEEKLY:-0}"
+RETENTION_MONTHLY="${RETENTION_MONTHLY:-0}"
 LOCAL_KEEP="${LOCAL_KEEP:-3}"
 MIN_FREE_SPACE="${MIN_FREE_SPACE:-1073741824}" # 1 GiB
 QUIESCE="${QUIESCE:-true}"
@@ -139,6 +139,9 @@ verify_archive() {
 check_prerequisites() {
   command -v zstd >/dev/null || die "zstd is not installed"
   command -v "$RCLONE_BIN" >/dev/null || die "rclone ($RCLONE_BIN) is not installed"
+  if [[ "$UPLOAD" == "true" ]]; then
+    [[ -f "$RCLONE_CONFIG" ]] || die "rclone config file not found: $RCLONE_CONFIG (run scripts/setup-r2.sh first)"
+  fi
   command -v docker >/dev/null || die "docker is not installed"
   docker info >/dev/null 2>&1 || die "cannot talk to the docker daemon"
   for c in "$MONGO_CONTAINER" "$REDIS_CONTAINER" "$SHARELATEX_CONTAINER"; do
@@ -327,8 +330,12 @@ retention_pass() {
 
   local i key
   local -a months=() weeks=()
-  for i in 0 1 2 3 4 5; do months+=("$(date -d "$(date +%Y-%m-01) - $i month" +%Y-%m)"); done
-  for i in 0 1 2 3; do weeks+=("$(date -d "$(date +%F) - $i weeks" +%G-%V)"); done
+  for ((i = 0; i < RETENTION_MONTHLY; i++)); do
+    months+=("$(date -d "$(date +%Y-%m-01) - $i month" +%Y-%m)")
+  done
+  for ((i = 0; i < RETENTION_WEEKLY; i++)); do
+    weeks+=("$(date -d "$(date +%F) - $i weeks" +%G-%V)")
+  done
 
   # newest backup per selected month / week
   local -A monthly_sel=() weekly_sel=()
@@ -348,15 +355,21 @@ retention_pass() {
     done <<< "$sorted"
   done
 
-  # daily selection: newest RETENTION_DAILY not already selected monthly/weekly
+  # daily selection: newest backups spanning up to RETENTION_DAILY distinct calendar days
+  # (keeping at least RETENTION_DAILY backups)
   local count=0
-  local -A daily_sel=()
+  local -A daily_sel=() seen_dates=()
+  local backup_date
   while read -r d _; do
     [[ -z "$d" ]] && continue
     if [[ -z "${monthly_sel[$d]:-}" && -z "${weekly_sel[$d]:-}" ]]; then
+      backup_date="${d:0:10}"
+      if (( count >= RETENTION_DAILY )) && (( ${#seen_dates[@]} >= RETENTION_DAILY )) && [[ -z "${seen_dates[$backup_date]:-}" ]]; then
+        break
+      fi
       daily_sel["$d"]=1
+      seen_dates["$backup_date"]=1
       count=$((count+1))
-      (( count >= RETENTION_DAILY )) && break
     fi
   done <<< "$sorted"
 
