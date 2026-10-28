@@ -238,9 +238,16 @@ const settings = {
   // but should be set to true in production.
   cacheStaticAssets: true,
 
-  // If you are running Overleaf Community Edition over https, set this to true to send the
-  // cookie with a secure flag (recommended).
-  secureCookie: process.env.OVERLEAF_SECURE_COOKIE != null,
+  // When running over HTTPS or behind an SSL proxy, 'auto' marks cookies Secure
+  // on HTTPS requests, while allowing plain HTTP access (e.g. via direct IP).
+  secureCookie:
+    process.env.OVERLEAF_SECURE_COOKIE === 'false'
+      ? false
+      : process.env.OVERLEAF_SECURE_COOKIE === 'strict'
+      ? true
+      : process.env.OVERLEAF_SECURE_COOKIE != null
+      ? 'auto'
+      : false,
 
   // If you are running Overleaf Community Edition behind a proxy (like Apache, Nginx, etc)
   // then set this to true to allow it to correctly detect the forwarded IP
