@@ -200,10 +200,10 @@ const settings = {
     process.env.OVERLEAF_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS === 'true',
 
   nav: {
-    title:
-      process.env.OVERLEAF_NAV_TITLE ||
-      process.env.OVERLEAF_APP_NAME ||
-      'Overleaf Community Edition',
+    title: process.env.OVERLEAF_NAV_TITLE || '',
+    custom_logo:
+      process.env.OVERLEAF_HEADER_IMAGE_URL ||
+      '/img/ol-brand/cloverleaf-header-logo.svg',
   },
 
   // The email address which users will be directed to as the main point of

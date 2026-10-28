@@ -36,3 +36,7 @@ services:
             - ../overrides/brand/android-chrome-512x512.png:/overleaf/services/web/public/android-chrome-512x512.png:ro
             - ../overrides/brand/favicon.ico:/overleaf/services/web/public/favicon.ico:ro
             - ../overrides/cm6-theme11-github.js:/overleaf/services/web/public/js/cm6-theme11-b348f89da4619a20c388.js:ro
+            - ../overrides/brand/cloverleaf-header-logo.svg:/overleaf/services/web/public/img/ol-brand/cloverleaf-header-logo.svg:ro
+            - ../overrides/brand/cloverleaf-header-logo-light.svg:/overleaf/services/web/public/img/ol-brand/cloverleaf-header-logo-light.svg:ro
+            - ../overrides/bundle-5919.js:/overleaf/services/web/public/js/5919-f03d194117b0e263043f.js:ro
+            - ../overrides/bundle-project-list.js:/overleaf/services/web/public/js/pages/project-list-488987128a13d2cf4af5.js:ro
