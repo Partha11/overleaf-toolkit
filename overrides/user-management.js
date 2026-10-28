@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+(function () {
 	function getCsrfToken() {
 		return (
 			document.querySelector('input[name="_csrf"]')?.value ||
@@ -145,7 +145,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	}
 
-	document.getElementById('user-search')?.addEventListener('input', filterUsers);
+	function init() {
+		document.getElementById('user-search')?.addEventListener('input', filterUsers);
 	document.getElementById('filter-role')?.addEventListener('change', filterUsers);
 
 	// Action buttons on users table (Link / Make Admin / Delete)
@@ -377,6 +378,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	});
 
-	// Initial stats calculation
-	updateStats();
-});
+		updateStats();
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+})();

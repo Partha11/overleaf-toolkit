@@ -1,4 +1,5 @@
 import Path from 'node:path'
+import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import UserGetter from '../../../../app/src/Features/User/UserGetter.mjs'
 import UserRegistrationHandler from '../../../../app/src/Features/User/UserRegistrationHandler.mjs'
@@ -58,6 +59,10 @@ async function generateActivationLink(req, user) {
   const host = req.get('host')
   const protocol = req.protocol || 'http'
   const baseUrl = host ? `${protocol}://${host}` : settings.siteUrl
+
+  if (user.loginCount > 0) {
+    return `${baseUrl}/user/password/set?passwordResetToken=${token}&email=${encodeURIComponent(user.email)}`
+  }
   return `${baseUrl}/user/activate?token=${token}&user_id=${user._id}`
 }
 
@@ -100,6 +105,7 @@ async function register(req, res, next) {
 
       user = await UserRegistrationHandler.promises.registerNewUser({
         email: em,
+        password: crypto.randomBytes(32).toString('hex'),
         holdingAccount: true,
       })
 
@@ -199,23 +205,12 @@ async function toggleAdmin(req, res, next) {
 
 async function resetPassword(req, res, next) {
   const { userId } = req.params
-  const user = await UserGetter.promises.getUser(userId, { _id: 1, email: 1 })
+  const user = await UserGetter.promises.getUser(userId, { _id: 1, email: 1, loginCount: 1 })
   if (!user) {
     return res.status(404).json({ error: 'User not found' })
   }
 
-  const ONE_WEEK = 7 * 24 * 60 * 60 // seconds
-  const token = await OneTimeTokenHandler.promises.getNewToken(
-    'password',
-    { user_id: user._id.toString(), email: user.email },
-    { expiresIn: ONE_WEEK }
-  )
-
-  const host = req.get('host')
-  const protocol = req.protocol || 'http'
-  const baseUrl = host ? `${protocol}://${host}` : settings.siteUrl
-  const setNewPasswordUrl = `${baseUrl}/user/activate?token=${token}&user_id=${user._id}`
-
+  const setNewPasswordUrl = await generateActivationLink(req, user)
   res.json({ success: true, setNewPasswordUrl, email: user.email })
 }
 
@@ -250,9 +245,9 @@ async function activateAccountPage(req, res, next) {
   })
 }
 
-function serveJs(req, res) {
+async function serveJs(req, res) {
   res.type('application/javascript')
-  res.sendFile(Path.resolve(__dirname, 'user-management.js'))
+  return res.sendFile(Path.resolve(__dirname, 'user-management.js'))
 }
 
 export default {

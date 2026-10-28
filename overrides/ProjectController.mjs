@@ -7,7 +7,11 @@ import logger from '@overleaf/logger'
 import { expressify } from '@overleaf/promise-utils'
 import mongodb from 'mongodb-legacy'
 import ProjectDeleter from './ProjectDeleter.mjs'
-import { DeletedProjectReasons } from './DeletedProjectReasons.mjs'
+let DeletedProjectReasons = { USER: 'user' }
+try {
+  const mod = await import('./DeletedProjectReasons.mjs')
+  DeletedProjectReasons = mod.DeletedProjectReasons || DeletedProjectReasons
+} catch {}
 import ProjectDuplicator from './ProjectDuplicator.mjs'
 import ProjectCreationHandler from './ProjectCreationHandler.mjs'
 import EditorController from '../Editor/EditorController.mjs'
@@ -54,8 +58,20 @@ import { isStandaloneAiAddOnPlanCode } from '../Subscription/AiHelper.mjs'
 import SubscriptionController from '../Subscription/SubscriptionController.mjs'
 import { formatCurrency } from '../../util/currency.js'
 import UserSettingsHelper from './UserSettingsHelper.mjs'
-import AiFeatureUsageRateLimiter from '../../infrastructure/rate-limiters/AiFeatureUsageRateLimiter.mjs'
-import WorkbenchRateLimiter from '../../infrastructure/rate-limiters/WorkbenchRateLimiter.mjs'
+let AiFeatureUsageRateLimiter = {
+  getRemainingFeatureUses: async () => ({}),
+}
+try {
+  const mod = await import('../../infrastructure/rate-limiters/AiFeatureUsageRateLimiter.mjs')
+  AiFeatureUsageRateLimiter = mod.default || mod || AiFeatureUsageRateLimiter
+} catch {}
+let WorkbenchRateLimiter = {
+  getRemainingTokens: async () => ({}),
+}
+try {
+  const mod = await import('../../infrastructure/rate-limiters/WorkbenchRateLimiter.mjs')
+  WorkbenchRateLimiter = mod.default || mod || WorkbenchRateLimiter
+} catch {}
 import PermissionsManager from '../Authorization/PermissionsManager.mjs'
 
 const { checkUserPermissions } = PermissionsManager.promises
@@ -574,11 +590,16 @@ const _ProjectController = {
               ).isMember)()
           : false,
         activeGroupSubscriptions:
-          SubscriptionLocator.promises.getUserActiveGroupSubscriptions(userId, {
-            _id: 1,
-            teamName: 1,
-            sharingPermissions: 1,
-          }),
+          SubscriptionLocator.promises.getUserActiveGroupSubscriptions
+            ? SubscriptionLocator.promises.getUserActiveGroupSubscriptions(
+                userId,
+                {
+                  _id: 1,
+                  teamName: 1,
+                  sharingPermissions: 1,
+                }
+              )
+            : [],
       })
 
       const {
@@ -733,7 +754,9 @@ const _ProjectController = {
           await CollaboratorsGetter.promises.getProjectAccess(projectId)
         const planLimit = ownerFeatures?.collaborators || 0
         const { namedEditors, pendingEditors, tokenEditors } =
-          projectAccess.getStats()
+          projectAccess.getStats
+            ? projectAccess.getStats()
+            : { namedEditors: 0, pendingEditors: 0, tokenEditors: 0 }
         const exceedAtLimit = planLimit > -1 && namedEditors >= planLimit
 
         let mode = 'edit'
