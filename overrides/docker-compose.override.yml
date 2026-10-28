@@ -32,5 +32,7 @@ services:
             - ../overrides/brand/favicon-32x32.png:/overleaf/services/web/public/favicon-32x32.png:ro
             - ../overrides/brand/favicon-16x16.png:/overleaf/services/web/public/favicon-16x16.png:ro
             - ../overrides/brand/apple-touch-icon.png:/overleaf/services/web/public/apple-touch-icon.png:ro
+            - ../overrides/brand/android-chrome-192x192.png:/overleaf/services/web/public/android-chrome-192x192.png:ro
+            - ../overrides/brand/android-chrome-512x512.png:/overleaf/services/web/public/android-chrome-512x512.png:ro
             - ../overrides/brand/favicon.ico:/overleaf/services/web/public/favicon.ico:ro
             - ../overrides/cm6-theme11-github.js:/overleaf/services/web/public/js/cm6-theme11-b348f89da4619a20c388.js:ro
