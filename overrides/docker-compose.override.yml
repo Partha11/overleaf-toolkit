@@ -36,7 +36,13 @@ services:
             - ../overrides/brand/android-chrome-512x512.png:/overleaf/services/web/public/android-chrome-512x512.png:ro
             - ../overrides/brand/favicon.ico:/overleaf/services/web/public/favicon.ico:ro
             - ../overrides/cm6-theme11-github.js:/overleaf/services/web/public/js/cm6-theme11-b348f89da4619a20c388.js:ro
+            - ../overrides/cm6-theme11-github.js:/overleaf/services/web/public/js/cm6-theme11-198689544ce2a7d4143b.js:ro
             - ../overrides/brand/cloverleaf-header-logo.svg:/overleaf/services/web/public/img/ol-brand/cloverleaf-header-logo.svg:ro
             - ../overrides/brand/cloverleaf-header-logo-light.svg:/overleaf/services/web/public/img/ol-brand/cloverleaf-header-logo-light.svg:ro
+            - ../overrides/brand/cloverleaf-header-logo-light.svg:/overleaf/services/web/public/images/overleaf-a-ds-solution-mallard-3cfddb5b360e11032218.svg:ro
+            - ../overrides/brand/cloverleaf-header-logo.svg:/overleaf/services/web/public/images/overleaf-a-ds-solution-mallard-dark-8c8e3258ed38ef4c1deb.svg:ro
+            - ../overrides/brand/cloverleaf-header-logo.svg:/overleaf/services/web/public/img/ol-brand/overleaf-a-ds-solution-mallard.svg:ro
             - ../overrides/bundle-5919.js:/overleaf/services/web/public/js/5919-f03d194117b0e263043f.js:ro
+            - ../overrides/bundle-5615.js:/overleaf/services/web/public/js/5615-e34a5cea479e84ebecd0.js:ro
             - ../overrides/bundle-project-list.js:/overleaf/services/web/public/js/pages/project-list-488987128a13d2cf4af5.js:ro
+            - ../overrides/bundle-project-list-622.js:/overleaf/services/web/public/js/pages/project-list-768945ab56d16bc2f31d.js:ro
