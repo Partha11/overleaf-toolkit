@@ -247,7 +247,7 @@ const settings = {
   // address and http/https protocol information.
 
   behindProxy: true,
-  trustedProxyIps: process.env.OVERLEAF_TRUSTED_PROXY_IPS || 'loopback',
+  trustedProxyIps: process.env.OVERLEAF_TRUSTED_PROXY_IPS || 'loopback,uniquelocal',
 
   // The amount of time, in milliseconds, until the (rolling) cookie session expires
   cookieSessionLength: parseInt(
