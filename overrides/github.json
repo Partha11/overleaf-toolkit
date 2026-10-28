@@ -1,0 +1,106 @@
+{
+  "theme": {
+    ".cm-gutters": {
+      "backgroundColor": "transparent",
+      "borderRightColor": "transparent",
+      "background": "#f6f8fa",
+      "color": "#8c959f"
+    },
+    "&": {
+      "background": "#ffffff",
+      "color": "#1f2328"
+    },
+    ".cm-cursor, .cm-dropCursor": {
+      "color": "#1f2328"
+    },
+    ".cm-activeLine": {
+      "background": "rgba(234, 238, 242, 0.5)"
+    },
+    "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection, .cm-searchMatch.cm-searchMatch.cm-searchMatch-selected": {
+      "background": "#b6e3ff"
+    },
+    "&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket": {
+      "margin": 0,
+      "outline": "1px solid #0969da"
+    },
+    ".cm-activeLineGutter": {
+      "backgroundColor": "#eaeef2"
+    },
+    ".cm-selectionMatch.cm-selectionMatch, .cm-searchMatch.cm-searchMatch": {
+      "background": "rgba(182, 227, 255, 0.4)",
+      "outline": "1px solid #54aeff",
+      "margin": 0
+    },
+    ".cm-foldPlaceholder": {
+      "backgroundColor": "#6f42c1"
+    }
+  },
+  "highlightStyle": {
+    ".tok-keyword": {
+      "color": "#cf222e",
+      "fontWeight": "bold"
+    },
+    ".tok-typeName": {
+      "color": "#0550ae"
+    },
+    ".tok-tagName": {
+      "color": "#116329"
+    },
+    ".tok-function": {
+      "color": "#8250df"
+    },
+    ".tok-macroName": {
+      "color": "#8250df"
+    },
+    ".tok-attributeValue": {
+      "color": "#8250df"
+    },
+    ".tok-attributeName": {
+      "color": "#0550ae"
+    },
+    ".tok-string": {
+      "color": "#0a3069"
+    },
+    ".tok-string2": {
+      "color": "#116329"
+    },
+    ".tok-regexp": {
+      "color": "#116329"
+    },
+    ".tok-literal": {
+      "color": "#0550ae",
+      "fontWeight": "bold"
+    },
+    ".tok-labelName": {
+      "color": "#953800"
+    },
+    ".tok-number": {
+      "color": "#0550ae"
+    },
+    ".tok-operator": {
+      "color": "#cf222e"
+    },
+    ".tok-heading": {
+      "color": "#0550ae",
+      "fontWeight": "bold"
+    },
+    ".tok-comment": {
+      "color": "#6e7781",
+      "fontStyle": "italic"
+    },
+    ".tok-variableName": {
+      "color": "#953800"
+    },
+    ".tok-strong": {
+      "fontWeight": "bold"
+    },
+    ".tok-emphasis": {
+      "fontStyle": "italic"
+    },
+    ".tok-invalid": {
+      "backgroundColor": "rgba(255, 0, 0, 0.1)",
+      "color": "#82071e"
+    }
+  },
+  "dark": false
+}

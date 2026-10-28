@@ -95,9 +95,15 @@ function main() {
   }
   trap cleanup EXIT
 
-  echo "Copying custom theme into build container..."
-  docker cp "$OVERRIDES_DIR/github_dark.json" \
-    "$BUILD_CONTAINER:$THEME_SRC/github_dark.json"
+  echo "Copying custom themes into build container..."
+  if [[ -f "$OVERRIDES_DIR/github.json" ]]; then
+    docker cp "$OVERRIDES_DIR/github.json" \
+      "$BUILD_CONTAINER:$THEME_SRC/github.json"
+  fi
+  if [[ -f "$OVERRIDES_DIR/github_dark.json" ]]; then
+    docker cp "$OVERRIDES_DIR/github_dark.json" \
+      "$BUILD_CONTAINER:$THEME_SRC/github_dark.json"
+  fi
 
   if [[ -d "$OVERRIDES_DIR/brand" ]]; then
     echo "Copying brand icons into build container..."

@@ -37,10 +37,41 @@
       "color": "#ff7b72",
       "fontWeight": "bold"
     },
+    ".tok-typeName": {
+      "color": "#79c0ff"
+    },
+    ".tok-tagName": {
+      "color": "#7ee787"
+    },
+    ".tok-function": {
+      "color": "#d2a8ff"
+    },
+    ".tok-macroName": {
+      "color": "#d2a8ff"
+    },
+    ".tok-attributeValue": {
+      "color": "#d2a8ff"
+    },
     ".tok-string": {
       "color": "#a5d6ff"
     },
+    ".tok-string2": {
+      "color": "#7ee787"
+    },
     ".tok-literal": {
+      "color": "#79c0ff",
+      "fontWeight": "bold"
+    },
+    ".tok-labelName": {
+      "color": "#ffa657"
+    },
+    ".tok-number": {
+      "color": "#79c0ff"
+    },
+    ".tok-operator": {
+      "color": "#ff7b72"
+    },
+    ".tok-heading": {
       "color": "#79c0ff",
       "fontWeight": "bold"
     },
