@@ -148,7 +148,8 @@ Bug reports and suggestions can be submitted via [GitHub Issues](https://github.
 
 ## Credits & Acknowledgements
 
-Cloverleaf is built upon and extends the official **[Overleaf Toolkit](https://github.com/overleaf/toolkit)** developed and maintained by [Overleaf](https://www.overleaf.com) (Digital Science / WriteLaTeX Ltd).
+- Special credit to **Sabbir Mahmud Afridi** for suggesting the name **Cloverleaf**.
+- Cloverleaf is built upon and extends the official **[Overleaf Toolkit](https://github.com/overleaf/toolkit)** developed and maintained by [Overleaf](https://www.overleaf.com) (Digital Science / WriteLaTeX Ltd).
 
 We express our gratitude to the Overleaf team and the open-source community for creating and supporting the foundational LaTeX collaborative editor ecosystem.
 
