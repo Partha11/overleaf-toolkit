@@ -33,5 +33,4 @@ services:
             - ../overrides/brand/favicon-16x16.png:/overleaf/services/web/public/favicon-16x16.png:ro
             - ../overrides/brand/apple-touch-icon.png:/overleaf/services/web/public/apple-touch-icon.png:ro
             - ../overrides/brand/favicon.ico:/overleaf/services/web/public/favicon.ico:ro
-            - ../data/public-build:/overleaf/services/web/public:ro
             - ../overrides/cm6-theme11-github.js:/overleaf/services/web/public/js/cm6-theme11-b348f89da4619a20c388.js:ro
