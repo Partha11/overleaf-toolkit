@@ -72,6 +72,7 @@ function main() {
   read_image_version
   read_config
   check_config
+  sync_docker_compose_override
   set_server_pro_image_name "$IMAGE_VERSION"
   export IMAGE
 

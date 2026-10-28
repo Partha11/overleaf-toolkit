@@ -104,6 +104,7 @@ function __main__() {
   SKIP_WARNINGS=true read_mongo_version
   check_config
   read_config
+  sync_docker_compose_override
 
   ensure_data_dirs_exist
 
