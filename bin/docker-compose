@@ -51,6 +51,9 @@ function build_environment() {
     set_git_bridge_vars
   fi
 
+  # Sync overrides/docker-compose.override.yml to config/ if changed
+  sync_docker_compose_override
+
   # Include docker-compose.override.yml if it is present
   if [[ -f "$TOOLKIT_ROOT/config/docker-compose.override.yml" ]]; then
     DOCKER_COMPOSE_FLAGS+=(-f "$TOOLKIT_ROOT/config/docker-compose.override.yml")
