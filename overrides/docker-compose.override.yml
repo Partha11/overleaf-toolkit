@@ -13,4 +13,23 @@ services:
             - ../overrides/manage_users.pug:/overleaf/services/web/modules/user-activate/app/views/user/manage_users.pug:ro
             - ../overrides/user-management.js:/overleaf/services/web/modules/user-activate/app/src/user-management.js:ro
             - ../overrides/github_dark.json:/overleaf/services/web/frontend/js/features/source-editor/themes/cm6/github_dark.json:ro
+            - ../overrides/_metadata.pug:/overleaf/services/web/app/views/_metadata.pug:ro
+            - ../overrides/ide-react.pug:/overleaf/services/web/app/views/project/ide-react.pug:ro
+            - ../overrides/brand/overleaf-o.svg:/overleaf/services/web/public/img/ol-brand/overleaf-o.svg:ro
+            - ../overrides/brand/overleaf-o-grey.svg:/overleaf/services/web/public/img/ol-brand/overleaf-o-grey.svg:ro
+            - ../overrides/brand/overleaf-o-white.svg:/overleaf/services/web/public/img/ol-brand/overleaf-o-white.svg:ro
+            - ../overrides/brand/overleaf-o-dark.svg:/overleaf/services/web/public/img/ol-brand/overleaf-o-dark.svg:ro
+            - ../overrides/brand/overleaf-o.svg:/overleaf/services/web/public/images/overleaf-o-7052183c04d0611b79e2.svg:ro
+            - ../overrides/brand/overleaf-o-grey.svg:/overleaf/services/web/public/images/overleaf-o-grey-f7605837650fa8d6aab8.svg:ro
+            - ../overrides/brand/overleaf-o-white.svg:/overleaf/services/web/public/images/overleaf-o-white-98904fbb7829929adf9f.svg:ro
+            - ../overrides/brand/overleaf-o-dark.svg:/overleaf/services/web/public/images/overleaf-o-dark-8e4b7e90b6b41301bd6a.svg:ro
+            - ../overrides/brand/favicon.svg:/overleaf/services/web/public/favicon.svg:ro
+            - ../overrides/brand/favicon-compiled.svg:/overleaf/services/web/public/favicon-compiled.svg:ro
+            - ../overrides/brand/favicon-compiling.svg:/overleaf/services/web/public/favicon-compiling.svg:ro
+            - ../overrides/brand/favicon-error.svg:/overleaf/services/web/public/favicon-error.svg:ro
+            - ../overrides/brand/mask-favicon.svg:/overleaf/services/web/public/mask-favicon.svg:ro
+            - ../overrides/brand/favicon-32x32.png:/overleaf/services/web/public/favicon-32x32.png:ro
+            - ../overrides/brand/favicon-16x16.png:/overleaf/services/web/public/favicon-16x16.png:ro
+            - ../overrides/brand/apple-touch-icon.png:/overleaf/services/web/public/apple-touch-icon.png:ro
+            - ../overrides/brand/favicon.ico:/overleaf/services/web/public/favicon.ico:ro
             - ../data/public-build:/overleaf/services/web/public:ro

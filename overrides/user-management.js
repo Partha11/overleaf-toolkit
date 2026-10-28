@@ -296,8 +296,16 @@
 				items.forEach(item => {
 					const tr = document.createElement('tr');
 					if (item.success !== false) {
+						const emailBadge = item.emailSent
+							? '<span class="badge bg-success-subtle text-success border border-success-subtle ms-2"><span class="material-symbols me-1" style="font-size: 13px; vertical-align: text-top;">mark_email_read</span>Email Sent</span>'
+							: (item.emailError ? `<span class="badge bg-warning-subtle text-dark border border-warning-subtle ms-2" title="${item.emailError}"><span class="material-symbols me-1" style="font-size: 13px; vertical-align: text-top;">mail_lock</span>Email Not Sent</span>` : '');
 						tr.innerHTML = `
-							<td><strong>${item.email}</strong></td>
+							<td>
+								<div class="d-flex align-items-center flex-wrap">
+									<strong>${item.email}</strong>
+									${emailBadge}
+								</div>
+							</td>
 							<td class="small font-monospace text-break">
 								${item.setNewPasswordUrl ? `<a href="${item.setNewPasswordUrl}" target="_blank" class="text-decoration-none">${item.setNewPasswordUrl}</a>` : '<span class="text-muted">–</span>'}
 							</td>
@@ -317,7 +325,13 @@
 				if (input) input.value = '';
 
 				const successfulCount = items.filter(r => r.success !== false).length;
-				showFlash('success', `Created activation link(s) for ${successfulCount} user(s). Share the links below with the users:`, true);
+				const emailSentCount = items.filter(r => r.success !== false && r.emailSent).length;
+				let msg = `Registered ${successfulCount} user(s).`;
+				if (emailSentCount > 0) {
+					msg += ` Invitation email sent to ${emailSentCount} user(s).`;
+				}
+				msg += ` Share or copy the activation link(s) below:`;
+				showFlash('success', msg, true);
 
 				// Dynamically add new users to the table if they are not already listed
 				const tbody = document.getElementById('users-tbody');
@@ -340,6 +354,7 @@
 							<td><span class="fw-medium user-email-text">${item.email}</span></td>
 							<td><span class="badge bg-secondary bg-opacity-25 text-dark role-badge">User</span></td>
 							<td><span class="badge bg-warning text-dark status-badge">Pending</span></td>
+							<td class="text-center"><span class="badge bg-light text-dark border" title="0 owned">0</span></td>
 							<td class="small text-muted">Just now</td>
 							<td class="small text-muted">Never</td>
 							<td class="text-end">

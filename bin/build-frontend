@@ -99,6 +99,18 @@ function main() {
   docker cp "$OVERRIDES_DIR/github_dark.json" \
     "$BUILD_CONTAINER:$THEME_SRC/github_dark.json"
 
+  if [[ -d "$OVERRIDES_DIR/brand" ]]; then
+    echo "Copying brand icons into build container..."
+    docker cp "$OVERRIDES_DIR/brand/overleaf-o.svg" \
+      "$BUILD_CONTAINER:/overleaf/services/web/public/img/ol-brand/overleaf-o.svg"
+    docker cp "$OVERRIDES_DIR/brand/overleaf-o-grey.svg" \
+      "$BUILD_CONTAINER:/overleaf/services/web/public/img/ol-brand/overleaf-o-grey.svg"
+    docker cp "$OVERRIDES_DIR/brand/overleaf-o-white.svg" \
+      "$BUILD_CONTAINER:/overleaf/services/web/public/img/ol-brand/overleaf-o-white.svg"
+    docker cp "$OVERRIDES_DIR/brand/overleaf-o-dark.svg" \
+      "$BUILD_CONTAINER:/overleaf/services/web/public/img/ol-brand/overleaf-o-dark.svg"
+  fi
+
   local pkg_manager install_cmd build_cmd
   if ! pkg_manager="$(detect_package_manager)"; then
     echo "ERROR: no package manager (pnpm, yarn or npm) found in image $IMAGE" >&2
@@ -145,6 +157,16 @@ function main() {
   fi
   rm -rf "$PUBLIC_DIR"/*
   docker cp "$BUILD_CONTAINER:/overleaf/services/web/public/." "$PUBLIC_DIR"
+
+  if [[ -d "$OVERRIDES_DIR/brand" ]]; then
+    mkdir -p "$PUBLIC_DIR/img/ol-brand"
+    cp -r "$OVERRIDES_DIR/brand/overleaf-o"* "$PUBLIC_DIR/img/ol-brand/"
+    for f in favicon.svg favicon-compiled.svg favicon-compiling.svg favicon-error.svg mask-favicon.svg favicon-32x32.png favicon-16x16.png apple-touch-icon.png favicon.ico; do
+      if [[ -f "$OVERRIDES_DIR/brand/$f" ]]; then
+        cp "$OVERRIDES_DIR/brand/$f" "$PUBLIC_DIR/$f"
+      fi
+    done
+  fi
 
   echo "Done."
   echo

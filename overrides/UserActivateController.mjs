@@ -7,6 +7,7 @@ import UserDeleter from '../../../../app/src/Features/User/UserDeleter.mjs'
 import ErrorController from '../../../../app/src/Features/Errors/ErrorController.mjs'
 import OneTimeTokenHandler from '../../../../app/src/Features/Security/OneTimeTokenHandler.mjs'
 import SessionManager from '../../../../app/src/Features/Authentication/SessionManager.mjs'
+import EmailHandler from '../../../../app/src/Features/Email/EmailHandler.mjs'
 import settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.mjs'
@@ -15,26 +16,66 @@ import { expressify } from '@overleaf/promise-utils'
 const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 
 async function manageUsersPage(req, res, next) {
-  const users = await db.users
-    .find(
-      {},
-      {
-        projection: {
-          _id: 1,
-          email: 1,
-          first_name: 1,
-          last_name: 1,
-          isAdmin: 1,
-          signUpDate: 1,
-          lastLoggedIn: 1,
-          lastActive: 1,
-          loginCount: 1,
-          holdingAccount: 1,
+  const [users, ownedProjectCounts, collabProjectCounts] = await Promise.all([
+    db.users
+      .find(
+        {},
+        {
+          projection: {
+            _id: 1,
+            email: 1,
+            first_name: 1,
+            last_name: 1,
+            isAdmin: 1,
+            signUpDate: 1,
+            lastLoggedIn: 1,
+            lastActive: 1,
+            loginCount: 1,
+            holdingAccount: 1,
+          },
+        }
+      )
+      .sort({ signUpDate: -1 })
+      .toArray(),
+    db.projects
+      .aggregate([
+        {
+          $group: {
+            _id: '$owner_ref',
+            count: { $sum: 1 },
+          },
         },
-      }
-    )
-    .sort({ signUpDate: -1 })
-    .toArray()
+      ])
+      .toArray(),
+    db.projects
+      .aggregate([
+        { $unwind: '$collaberator_refs' },
+        {
+          $group: {
+            _id: '$collaberator_refs',
+            count: { $sum: 1 },
+          },
+        },
+      ])
+      .toArray(),
+  ])
+
+  const ownedMap = new Map()
+  for (const item of ownedProjectCounts) {
+    if (item._id) ownedMap.set(item._id.toString(), item.count)
+  }
+
+  const collabMap = new Map()
+  for (const item of collabProjectCounts) {
+    if (item._id) collabMap.set(item._id.toString(), item.count)
+  }
+
+  for (const user of users) {
+    const userIdStr = user._id.toString()
+    user.ownedProjectCount = ownedMap.get(userIdStr) || 0
+    user.sharedProjectCount = collabMap.get(userIdStr) || 0
+    user.projectCount = user.ownedProjectCount + user.sharedProjectCount
+  }
 
   const sessionUser = SessionManager.getSessionUser(req.session)
   const csrfToken = req.csrfToken ? req.csrfToken() : (res.locals && (res.locals.csrfToken || res.locals._csrf)) || ''
@@ -56,8 +97,9 @@ async function generateActivationLink(req, user) {
     { expiresIn: ONE_WEEK }
   )
 
-  const host = req.get('host')
-  const protocol = req.protocol || 'http'
+  const forwardedProto = req.headers ? req.headers['x-forwarded-proto'] : null
+  const protocol = forwardedProto || req.protocol || 'http'
+  const host = req.get ? req.get('host') : null
   const baseUrl = host ? `${protocol}://${host}` : settings.siteUrl
 
   if (user.loginCount > 0) {
@@ -86,39 +128,42 @@ async function register(req, res, next) {
   for (const em of validEmails) {
     try {
       let user = await UserGetter.promises.getUserByAnyEmail(em)
+      let alreadyExisted = false
       if (user) {
-        const setNewPasswordUrl = await generateActivationLink(req, user)
-        results.push({
-          _id: user._id,
-          email: user.email,
-          first_name: user.first_name || '',
-          last_name: user.last_name || '',
-          isAdmin: !!user.isAdmin,
-          signUpDate: user.signUpDate || new Date(),
-          loginCount: user.loginCount || 0,
-          setNewPasswordUrl,
-          success: true,
-          alreadyExisted: true,
+        alreadyExisted = true
+      } else {
+        user = await UserRegistrationHandler.promises.registerNewUser({
+          email: em,
+          password: crypto.randomBytes(32).toString('hex'),
+          holdingAccount: true,
         })
-        continue
-      }
-
-      user = await UserRegistrationHandler.promises.registerNewUser({
-        email: em,
-        password: crypto.randomBytes(32).toString('hex'),
-        holdingAccount: true,
-      })
-
-      // Try sending activation email if configured, but never fail registration if mail server is missing
-      try {
-        if (UserRegistrationHandler.promises.sendActivationEmail) {
-          await UserRegistrationHandler.promises.sendActivationEmail(user)
-        }
-      } catch (mailErr) {
-        logger.warn({ mailErr, email: em }, 'activation email not sent (no mail server configured), direct link will be displayed')
       }
 
       const setNewPasswordUrl = await generateActivationLink(req, user)
+
+      let emailSent = false
+      let emailError = null
+      try {
+        const emailType = (user.loginCount > 0) ? 'passwordResetRequested' : 'registered'
+        await EmailHandler.promises.sendEmail(emailType, {
+          to: user.email,
+          setNewPasswordUrl,
+        })
+        const hasMailConfig = !!(settings.email && settings.email.parameters)
+        if (hasMailConfig) {
+          emailSent = true
+          logger.info({ email: user.email, emailType, alreadyExisted }, 'sent registration/activation email to user')
+        } else {
+          emailError = 'No mail server configured on this instance'
+          logger.info({ email: user.email, emailType }, 'email server not configured; simulated email send')
+        }
+      } catch (mailErr) {
+        emailError = mailErr?.message || 'Failed to send email'
+        logger.warn(
+          { mailErr, email: user.email },
+          'failed to send registration/activation email'
+        )
+      }
 
       results.push({
         _id: user._id,
@@ -129,7 +174,10 @@ async function register(req, res, next) {
         signUpDate: user.signUpDate || new Date(),
         loginCount: user.loginCount || 0,
         setNewPasswordUrl,
+        emailSent,
+        emailError,
         success: true,
+        alreadyExisted,
       })
     } catch (err) {
       logger.error({ err, email: em }, 'failed to register user in admin panel')
