@@ -11,5 +11,6 @@ services:
             - ../overrides/CommentController.mjs:/overleaf/services/web/modules/user-activate/app/src/CommentController.mjs:ro
             - ../overrides/UserActivateRouter.mjs:/overleaf/services/web/modules/user-activate/app/src/UserActivateRouter.mjs:ro
             - ../overrides/manage_users.pug:/overleaf/services/web/modules/user-activate/app/views/user/manage_users.pug:ro
+            - ../overrides/user-management.js:/overleaf/services/web/modules/user-activate/app/src/user-management.js:ro
             - ../overrides/github_dark.json:/overleaf/services/web/frontend/js/features/source-editor/themes/cm6/github_dark.json:ro
             - ../data/public-build:/overleaf/services/web/public:ro

@@ -29,6 +29,13 @@ export default {
       UserActivateController.register
     )
 
+    // Serve client-side JavaScript for user management page (same-origin to satisfy CSP)
+    webRouter.get(
+      '/admin/user-management.js',
+      AuthorizationMiddleware.ensureUserIsSiteAdmin,
+      UserActivateController.serveJs
+    )
+
     // User management action routes
     webRouter.post(
       '/admin/user/:userId/delete',

@@ -36,12 +36,29 @@ async function manageUsersPage(req, res, next) {
     .toArray()
 
   const sessionUser = SessionManager.getSessionUser(req.session)
+  const csrfToken = req.csrfToken ? req.csrfToken() : (res.locals && (res.locals.csrfToken || res.locals._csrf)) || ''
 
   res.render(Path.resolve(__dirname, '../views/user/manage_users'), {
     title: 'Manage Users',
     users,
     currentUser: sessionUser,
+    csrfToken,
+    _csrf: csrfToken,
   })
+}
+
+async function generateActivationLink(req, user) {
+  const ONE_WEEK = 7 * 24 * 60 * 60 // seconds
+  const token = await OneTimeTokenHandler.promises.getNewToken(
+    'password',
+    { user_id: user._id.toString(), email: user.email },
+    { expiresIn: ONE_WEEK }
+  )
+
+  const host = req.get('host')
+  const protocol = req.protocol || 'http'
+  const baseUrl = host ? `${protocol}://${host}` : settings.siteUrl
+  return `${baseUrl}/user/activate?token=${token}&user_id=${user._id}`
 }
 
 async function register(req, res, next) {
@@ -50,12 +67,12 @@ async function register(req, res, next) {
   if (Array.isArray(emails)) {
     rawEmails = emails
   } else if (typeof emails === 'string' && emails.trim()) {
-    rawEmails = emails.split(/[\s,]+/)
+    rawEmails = emails.split(/[\s,;\n\r]+/)
   } else if (typeof email === 'string' && email.trim()) {
-    rawEmails = email.split(/[\s,]+/)
+    rawEmails = email.split(/[\s,;\n\r]+/)
   }
 
-  const validEmails = rawEmails.map(e => e.trim()).filter(e => e.includes('@'))
+  const validEmails = rawEmails.map(e => e.trim().toLowerCase()).filter(e => e.includes('@'))
   if (validEmails.length === 0) {
     return res.status(422).json({ error: 'No valid email addresses provided' })
   }
@@ -63,10 +80,40 @@ async function register(req, res, next) {
   const results = []
   for (const em of validEmails) {
     try {
-      const { user, setNewPasswordUrl } =
-        await UserRegistrationHandler.promises.registerNewUserAndSendActivationEmail(
-          em
-        )
+      let user = await UserGetter.promises.getUserByAnyEmail(em)
+      if (user) {
+        const setNewPasswordUrl = await generateActivationLink(req, user)
+        results.push({
+          _id: user._id,
+          email: user.email,
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
+          isAdmin: !!user.isAdmin,
+          signUpDate: user.signUpDate || new Date(),
+          loginCount: user.loginCount || 0,
+          setNewPasswordUrl,
+          success: true,
+          alreadyExisted: true,
+        })
+        continue
+      }
+
+      user = await UserRegistrationHandler.promises.registerNewUser({
+        email: em,
+        holdingAccount: true,
+      })
+
+      // Try sending activation email if configured, but never fail registration if mail server is missing
+      try {
+        if (UserRegistrationHandler.promises.sendActivationEmail) {
+          await UserRegistrationHandler.promises.sendActivationEmail(user)
+        }
+      } catch (mailErr) {
+        logger.warn({ mailErr, email: em }, 'activation email not sent (no mail server configured), direct link will be displayed')
+      }
+
+      const setNewPasswordUrl = await generateActivationLink(req, user)
+
       results.push({
         _id: user._id,
         email: user.email,
@@ -203,6 +250,11 @@ async function activateAccountPage(req, res, next) {
   })
 }
 
+function serveJs(req, res) {
+  res.type('application/javascript')
+  res.sendFile(Path.resolve(__dirname, 'user-management.js'))
+}
+
 export default {
   registerNewUser: expressify(manageUsersPage),
   register: expressify(register),
@@ -210,4 +262,5 @@ export default {
   toggleAdmin: expressify(toggleAdmin),
   resetPassword: expressify(resetPassword),
   activateAccountPage: expressify(activateAccountPage),
+  serveJs: expressify(serveJs),
 }
