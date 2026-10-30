@@ -15,6 +15,10 @@ services:
             - ../overrides/github.json:/overleaf/services/web/frontend/js/features/source-editor/themes/cm6/github.json:ro
             - ../overrides/github_dark.json:/overleaf/services/web/frontend/js/features/source-editor/themes/cm6/github_dark.json:ro
             - ../overrides/_metadata.pug:/overleaf/services/web/app/views/_metadata.pug:ro
+            - ../overrides/cloverleaf-overrides-v1.css:/overleaf/services/web/public/stylesheets/cloverleaf-overrides-v1.css:ro
+            - ../overrides/cloverleaf-overrides-v2.css:/overleaf/services/web/public/stylesheets/cloverleaf-overrides-v2.css:ro
+            - ../overrides/cloverleaf-overrides-v3.css:/overleaf/services/web/public/stylesheets/cloverleaf-overrides-v3.css:ro
+            - ../overrides/cloverleaf-overrides-v4.css:/overleaf/services/web/public/stylesheets/cloverleaf-overrides-v4.css:ro
             - ../overrides/ide-react.pug:/overleaf/services/web/app/views/project/ide-react.pug:ro
             - ../overrides/brand/overleaf-o.svg:/overleaf/services/web/public/img/ol-brand/overleaf-o.svg:ro
             - ../overrides/brand/overleaf-o-grey.svg:/overleaf/services/web/public/img/ol-brand/overleaf-o-grey.svg:ro

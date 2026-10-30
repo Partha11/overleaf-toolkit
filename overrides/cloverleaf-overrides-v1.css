@@ -1,0 +1,1004 @@
+/* 1. Navbar Logo and Sidebar Left-Edge Alignment */
+.navbar-default .navbar-header,
+.navbar-main .navbar-header {
+display: flex !important;
+align-items: center !important;
+}
+.navbar-default .navbar-brand,
+.navbar-main .navbar-brand {
+display: flex !important;
+align-items: center !important;
+padding-left: 0 !important;
+margin-left: 0 !important;
+height: 100% !important;
+}
+.navbar-default .navbar-brand .navbar-logo,
+.navbar-default .navbar-header .navbar-logo,
+.project-ds-nav-page .navbar-default .navbar-header .navbar-logo {
+position: static !important;
+top: 0 !important;
+width: 148px !important;
+height: 32px !important;
+background-image: url("/img/ol-brand/cloverleaf-header-logo.svg") !important;
+background-size: contain !important;
+background-repeat: no-repeat !important;
+background-position: left center !important;
+align-self: center !important;
+}
+[data-theme='light'] .navbar-default .navbar-brand .navbar-logo,
+[data-theme='light'] .navbar-default .navbar-header .navbar-logo,
+[data-theme='light'] .project-ds-nav-page .navbar-default .navbar-header .navbar-logo,
+[data-theme='light'] .navbar-logo,
+body[data-theme='light'] .navbar-logo,
+html[data-theme='light'] .navbar-logo,
+body:not([data-theme='default']) .website-redesign .navbar-default .navbar-logo {
+background-image: url("/img/ol-brand/cloverleaf-header-logo-light.svg") !important;
+}
+.navbar-default .navbar-brand .navbar-title {
+display: none !important;
+}
+
+/* 2. Green Accent Line Separating Navbar from Content */
+nav.navbar.navbar-default,
+nav.navbar.navbar-main,
+.project-ds-nav-page .navbar-default {
+border-bottom: 2px solid #2f9e52 !important;
+}
+
+/* 3. Marketing Navbar Flex Layout Alignment */
+@media (min-width: 992px) {
+nav.navbar #navbar-main-collapse {
+display: flex !important;
+align-items: center !important;
+justify-content: flex-end !important;
+flex-basis: auto !important;
+flex-grow: 1 !important;
+}
+nav.navbar .navbar-nav,
+nav.navbar .navbar-nav.navbar-right {
+display: flex !important;
+flex-direction: row !important;
+align-items: center !important;
+justify-content: flex-end !important;
+flex-wrap: nowrap !important;
+margin: 0 !important;
+padding: 0 !important;
+float: none !important;
+list-style: none !important;
+}
+nav.navbar .navbar-nav > li {
+display: inline-flex !important;
+align-items: center !important;
+float: none !important;
+margin-top: 0 !important;
+margin-bottom: 0 !important;
+height: auto !important;
+position: relative !important;
+}
+}
+
+nav.navbar .navbar-nav > li > a,
+nav.navbar .navbar-nav > li > button.dropdown-toggle {
+border: none !important;
+outline: none !important;
+}
+
+/* 3b. Muted Gray Docs Link & Quick Theme Toggle */
+.nav-item-docs {
+display: inline-flex !important;
+align-items: center !important;
+margin-right: 6px !important;
+}
+.docs-link {
+color: #9aa5b1 !important;
+font-size: 14px !important;
+font-weight: 500 !important;
+padding: 6px 12px !important;
+text-decoration: none !important;
+border: none !important;
+transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.docs-link:hover,
+.docs-link:focus {
+color: #e8ecef !important;
+text-decoration: none !important;
+border: none !important;
+}
+[data-theme='light'] .docs-link {
+color: #637381 !important;
+}
+[data-theme='light'] .docs-link:hover,
+[data-theme='light'] .docs-link:focus {
+color: #1b222c !important;
+border: none !important;
+}
+
+.nav-item-theme {
+display: inline-flex !important;
+align-items: center !important;
+margin-right: 8px !important;
+}
+.theme-quick-toggle {
+background: transparent !important;
+border: none !important;
+color: #9aa5b1 !important;
+width: 32px !important;
+height: 32px !important;
+border-radius: 50% !important;
+display: inline-flex !important;
+align-items: center !important;
+justify-content: center !important;
+padding: 0 !important;
+cursor: pointer !important;
+outline: none !important;
+transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.theme-quick-toggle:hover,
+.theme-quick-toggle:focus {
+color: #e8ecef !important;
+background-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-theme='light'] .theme-quick-toggle {
+color: #637381 !important;
+}
+[data-theme='light'] .theme-quick-toggle:hover,
+[data-theme='light'] .theme-quick-toggle:focus {
+color: #1b222c !important;
+background-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+/* Smooth Avatar & Username Hover Effect */
+.nav-item-admin-avatar {
+display: inline-flex !important;
+align-items: center !important;
+margin-right: 8px !important;
+position: relative !important;
+}
+.nav-item-admin-avatar .dropdown-toggle {
+padding: 0 !important;
+margin: 0 !important;
+background: transparent !important;
+border: none !important;
+box-shadow: none !important;
+outline: none !important;
+display: inline-flex !important;
+align-items: center !important;
+justify-content: center !important;
+border-radius: 50% !important;
+cursor: pointer !important;
+line-height: 1 !important;
+}
+.nav-item-admin-avatar .dropdown-toggle::after,
+.nav-item-admin-avatar .dropdown-toggle svg {
+display: none !important;
+}
+.navbar-avatar-circle {
+width: 32px !important;
+height: 32px !important;
+border-radius: 50% !important;
+background-color: #27763d !important;
+color: #ffffff !important;
+display: inline-flex !important;
+align-items: center !important;
+justify-content: center !important;
+font-size: 13px !important;
+font-weight: 600 !important;
+letter-spacing: 0.5px !important;
+line-height: 1 !important;
+user-select: none !important;
+box-shadow: 0 0 0 1.5px rgba(47, 158, 82, 0.35) !important;
+transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+cursor: pointer !important;
+will-change: background-color, box-shadow !important;
+}
+.nav-item-admin-avatar .dropdown-toggle:hover .navbar-avatar-circle,
+.nav-item-admin-avatar .dropdown-toggle:focus .navbar-avatar-circle,
+.nav-item-admin-avatar .dropdown-toggle.show .navbar-avatar-circle,
+.navbar-avatar-circle:hover {
+background-color: #2f9e52 !important;
+box-shadow: 0 0 0 3px rgba(47, 158, 82, 0.45), 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+}
+[data-theme='light'] .navbar-avatar-circle {
+background-color: #27763d !important;
+box-shadow: 0 0 0 1.5px rgba(39, 118, 61, 0.3) !important;
+}
+[data-theme='light'] .nav-item-admin-avatar .dropdown-toggle:hover .navbar-avatar-circle,
+[data-theme='light'] .nav-item-admin-avatar .dropdown-toggle:focus .navbar-avatar-circle,
+[data-theme='light'] .nav-item-admin-avatar .dropdown-toggle.show .navbar-avatar-circle,
+[data-theme='light'] .navbar-avatar-circle:hover {
+background-color: #2f9e52 !important;
+box-shadow: 0 0 0 3px rgba(47, 158, 82, 0.35), 0 2px 10px rgba(0, 0, 0, 0.12) !important;
+}
+.dropdown-item-theme-container .theme-toggle {
+padding: 8px 16px !important;
+}
+
+/* 4. Left Sidebar Footer Brand Styling */
+.ds-nav-ds-name {
+margin-bottom: var(--spacing-05) !important;
+}
+.ds-nav-ds-name span {
+text-transform: none !important;
+font-weight: 600 !important;
+font-size: 13px !important;
+letter-spacing: 0.3px !important;
+color: var(--ds-nav-color, #9aa5b1) !important;
+}
+
+/* 5. Project Search Bar Dark Mode Styling */
+body:not([data-theme='light']) .project-search input.form-control,
+body[data-theme='default'] .project-search input.form-control,
+html[data-theme='default'] .project-search input.form-control {
+background-color: #1b222c !important;
+color: #e8ecef !important;
+border: 1px solid #455268 !important;
+transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease !important;
+}
+body:not([data-theme='light']) .project-search input.form-control::placeholder,
+body[data-theme='default'] .project-search input.form-control::placeholder,
+html[data-theme='default'] .project-search input.form-control::placeholder {
+color: #8e9caa !important;
+opacity: 1 !important;
+}
+body:not([data-theme='light']) .project-search .form-control-start-icon,
+body[data-theme='default'] .project-search .form-control-start-icon,
+html[data-theme='default'] .project-search .form-control-start-icon {
+color: #8e9caa !important;
+transition: color 0.2s ease !important;
+}
+body:not([data-theme='light']) .project-search input.form-control:focus,
+body[data-theme='default'] .project-search input.form-control:focus,
+html[data-theme='default'] .project-search input.form-control:focus {
+background-color: #161c24 !important;
+color: #ffffff !important;
+border-color: #2f9e52 !important;
+box-shadow: 0 0 0 2px rgba(47, 158, 82, 0.35) !important;
+outline: none !important;
+}
+body:not([data-theme='light']) .project-search .form-control-wrapper:focus-within .form-control-start-icon,
+body[data-theme='default'] .project-search .form-control-wrapper:focus-within .form-control-start-icon,
+html[data-theme='default'] .project-search .form-control-wrapper:focus-within .form-control-start-icon {
+color: #2f9e52 !important;
+}
+
+[data-theme='light'] .project-search input.form-control:focus {
+border-color: #2f9e52 !important;
+box-shadow: 0 0 0 2px rgba(47, 158, 82, 0.25) !important;
+outline: none !important;
+}
+[data-theme='light'] .project-search .form-control-wrapper:focus-within .form-control-start-icon {
+color: #2f9e52 !important;
+}
+
+/* 6. Comprehensive Dark Mode for Account Settings, Admin & Manage Users */
+body:not([data-theme='light']),
+body[data-theme='default'],
+html[data-theme='default'] body {
+background-color: #171d25 !important;
+color: #e8ecef !important;
+}
+
+[data-theme='light'] nav.navbar,
+[data-theme='light'] .navbar-default,
+[data-theme='light'] .navbar-main,
+[data-theme='light'] .navbar-light,
+[data-theme='light'] .website-redesign .navbar-default,
+body[data-theme='light'] nav.navbar,
+body[data-theme='light'] .navbar-default,
+body[data-theme='light'] .navbar-main,
+body[data-theme='light'] .navbar-light,
+body[data-theme='light'] .website-redesign .navbar-default,
+html[data-theme='light'] nav.navbar,
+html[data-theme='light'] .navbar-default,
+html[data-theme='light'] .navbar-main {
+background-color: #ffffff !important;
+--navbar-bg: #ffffff !important;
+border-bottom: 2px solid #2f9e52 !important;
+}
+
+body:not([data-theme='light']) nav.navbar,
+body:not([data-theme='light']) .navbar-default,
+body:not([data-theme='light']) .navbar-main,
+body:not([data-theme='light']) .navbar-light,
+body:not([data-theme='light']) .website-redesign .navbar-default,
+body[data-theme='default'] nav.navbar,
+body[data-theme='default'] .navbar-default,
+body[data-theme='default'] .navbar-main,
+body[data-theme='default'] .navbar-light,
+html[data-theme='default'] nav.navbar,
+html[data-theme='default'] .navbar-default,
+html[data-theme='default'] .navbar-main {
+background-color: #1b222c !important;
+--navbar-bg: #1b222c !important;
+border-bottom: 2px solid #2f9e52 !important;
+}
+
+body:not([data-theme='light']) .content,
+body:not([data-theme='light']) .content-alt,
+body:not([data-theme='light']) #main-content,
+body:not([data-theme='light']) .page-content,
+body:not([data-theme='light']) .settings-page,
+body:not([data-theme='light']) #settings-page-root,
+body[data-theme='default'] .content,
+body[data-theme='default'] .content-alt,
+body[data-theme='default'] #main-content,
+body[data-theme='default'] #settings-page-root,
+html[data-theme='default'] #main-content {
+background-color: #171d25 !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .card,
+body:not([data-theme='light']) .page-content-card,
+body:not([data-theme='light']) .panel,
+body:not([data-theme='light']) .well,
+body[data-theme='default'] .card,
+body[data-theme='default'] .page-content-card,
+body[data-theme='default'] .panel,
+html[data-theme='default'] .card {
+background-color: #1f2733 !important;
+border: 1px solid #313d4f !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .card-header,
+body:not([data-theme='light']) .card-footer,
+body:not([data-theme='light']) .panel-heading,
+body:not([data-theme='light']) .panel-footer,
+body[data-theme='default'] .card-header,
+body[data-theme='default'] .card-footer {
+background-color: #1a222c !important;
+border-color: #313d4f !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .card-body,
+body[data-theme='default'] .card-body {
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) h1,
+body:not([data-theme='light']) h2,
+body:not([data-theme='light']) h3,
+body:not([data-theme='light']) h4,
+body:not([data-theme='light']) h5,
+body:not([data-theme='light']) h6,
+body:not([data-theme='light']) .page-header h1,
+body[data-theme='default'] h1,
+body[data-theme='default'] h2,
+body[data-theme='default'] h3,
+body[data-theme='default'] h4,
+body[data-theme='default'] h5,
+body[data-theme='default'] h6 {
+color: #f0f3f6 !important;
+}
+
+body:not([data-theme='light']) .text-muted,
+body:not([data-theme='light']) .form-text,
+body:not([data-theme='light']) .text-secondary,
+body:not([data-theme='light']) p.text-muted,
+body[data-theme='default'] .text-muted,
+body[data-theme='default'] .form-text,
+body[data-theme='default'] .text-secondary {
+color: #9aa5b1 !important;
+}
+
+body:not([data-theme='light']) label,
+body:not([data-theme='light']) .form-label,
+body[data-theme='default'] label,
+body[data-theme='default'] .form-label {
+color: #cdd5df !important;
+}
+
+body:not([data-theme='light']) table,
+body:not([data-theme='light']) .table,
+body[data-theme='default'] table,
+body[data-theme='default'] .table {
+background-color: #1f2733 !important;
+color: #e8ecef !important;
+border-color: #313d4f !important;
+}
+
+body:not([data-theme='light']) .table > :not(caption) > * > *,
+body[data-theme='default'] .table > :not(caption) > * > * {
+background-color: transparent !important;
+color: #e8ecef !important;
+border-bottom-color: #313d4f !important;
+}
+
+body:not([data-theme='light']) thead,
+body:not([data-theme='light']) thead.table-light,
+body:not([data-theme='light']) .table thead th,
+body:not([data-theme='light']) .table-light,
+body[data-theme='default'] thead,
+body[data-theme='default'] thead.table-light,
+body[data-theme='default'] .table thead th {
+background-color: #161c24 !important;
+color: #9aa5b1 !important;
+border-bottom: 2px solid #313d4f !important;
+}
+
+body:not([data-theme='light']) .table-hover > tbody > tr:hover > *,
+body[data-theme='default'] .table-hover > tbody > tr:hover > * {
+background-color: rgba(255, 255, 255, 0.04) !important;
+color: #ffffff !important;
+}
+
+/* Bootstrap paints table hover states with CSS variables and an inset
+   box-shadow, so background-color alone does not prevent its white hover. */
+body:not([data-theme='light']) #users-table.table-hover,
+body[data-theme='default'] #users-table.table-hover {
+--bs-table-hover-bg: #27313f !important;
+--bs-table-hover-color: #ffffff !important;
+}
+
+body:not([data-theme='light']) #users-table.table-hover > tbody > tr:hover > *,
+body[data-theme='default'] #users-table.table-hover > tbody > tr:hover > * {
+--bs-table-accent-bg: #27313f !important;
+--bs-table-bg-state: #27313f !important;
+--bs-table-color-state: #ffffff !important;
+background-color: #27313f !important;
+box-shadow: inset 0 0 0 9999px #27313f !important;
+color: #ffffff !important;
+}
+
+body:not([data-theme='light']) input.form-control,
+body:not([data-theme='light']) select.form-select,
+body:not([data-theme='light']) textarea.form-control,
+body[data-theme='default'] input.form-control,
+body[data-theme='default'] select.form-select,
+body[data-theme='default'] textarea.form-control {
+background-color: #1b222c !important;
+border: 1px solid #455268 !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) input.form-control:focus,
+body:not([data-theme='light']) select.form-select:focus,
+body:not([data-theme='light']) textarea.form-control:focus,
+body[data-theme='default'] input.form-control:focus,
+body[data-theme='default'] select.form-select:focus,
+body[data-theme='default'] textarea.form-control:focus {
+background-color: #161c24 !important;
+border-color: #2f9e52 !important;
+box-shadow: 0 0 0 2px rgba(47, 158, 82, 0.35) !important;
+color: #ffffff !important;
+outline: none !important;
+}
+
+body:not([data-theme='light']) input.form-control::placeholder,
+body:not([data-theme='light']) textarea.form-control::placeholder,
+body[data-theme='default'] input.form-control::placeholder,
+body[data-theme='default'] textarea.form-control::placeholder {
+color: #8e9caa !important;
+opacity: 1 !important;
+}
+
+body:not([data-theme='light']) .input-group-text,
+body[data-theme='default'] .input-group-text {
+background-color: #161c24 !important;
+border-color: #455268 !important;
+color: #9aa5b1 !important;
+}
+
+body:not([data-theme='light']) .nav-tabs,
+body[data-theme='default'] .nav-tabs {
+border-bottom-color: #313d4f !important;
+}
+
+body:not([data-theme='light']) .nav-tabs .nav-link,
+body[data-theme='default'] .nav-tabs .nav-link {
+color: #9aa5b1 !important;
+border: none !important;
+}
+
+body:not([data-theme='light']) .nav-tabs .nav-link.active,
+body[data-theme='default'] .nav-tabs .nav-link.active {
+background-color: #1f2733 !important;
+color: #2f9e52 !important;
+border-bottom: 2px solid #2f9e52 !important;
+}
+
+body:not([data-theme='light']) .tab-content,
+body[data-theme='default'] .tab-content {
+background-color: #1f2733 !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .btn-outline-secondary,
+body[data-theme='default'] .btn-outline-secondary {
+color: #cdd5df !important;
+border-color: #455268 !important;
+}
+
+body:not([data-theme='light']) .btn-outline-secondary:hover,
+body[data-theme='default'] .btn-outline-secondary:hover {
+background-color: #313d4f !important;
+color: #ffffff !important;
+}
+
+body:not([data-theme='light']) .badge.bg-secondary,
+body[data-theme='default'] .badge.bg-secondary {
+background-color: #313d4f !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .badge.bg-light,
+body[data-theme='default'] .badge.bg-light {
+background-color: #27313f !important;
+color: #e8ecef !important;
+border-color: #3d4c60 !important;
+}
+
+body:not([data-theme='light']) hr,
+body[data-theme='default'] hr {
+border-color: #313d4f !important;
+opacity: 1 !important;
+}
+
+body:not([data-theme='light']) .list-group-item,
+body[data-theme='default'] .list-group-item {
+background-color: #1f2733 !important;
+border-color: #313d4f !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .modal-content,
+body[data-theme='default'] .modal-content {
+background-color: #1f2733 !important;
+border: 1px solid #313d4f !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .modal-header,
+body:not([data-theme='light']) .modal-footer,
+body[data-theme='default'] .modal-header,
+body[data-theme='default'] .modal-footer {
+border-color: #313d4f !important;
+}
+
+body:not([data-theme='light']) .modal-header .btn-close,
+body[data-theme='default'] .modal-header .btn-close,
+html[data-theme='default'] .modal-header .btn-close {
+filter: invert(1) grayscale(100%) brightness(200%) !important;
+opacity: 0.85 !important;
+}
+
+body:not([data-theme='light']) .modal-header .btn-close:hover,
+body:not([data-theme='light']) .modal-header .btn-close:focus,
+body[data-theme='default'] .modal-header .btn-close:hover,
+body[data-theme='default'] .modal-header .btn-close:focus,
+html[data-theme='default'] .modal-header .btn-close:hover,
+html[data-theme='default'] .modal-header .btn-close:focus {
+opacity: 1 !important;
+}
+
+/* Keep the editor Settings sidebar readable in dark mode. */
+body:not([data-theme='light']) .ide-settings-modal-body .ide-settings-tab-link,
+body[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link,
+html[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link {
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .ide-settings-modal-body .ide-settings-tab-link:hover,
+body:not([data-theme='light']) .ide-settings-modal-body .ide-settings-tab-link:focus,
+body[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link:hover,
+body[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link:focus,
+html[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link:hover,
+html[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link:focus {
+background-color: #27313f !important;
+color: #ffffff !important;
+}
+
+body:not([data-theme='light']) .ide-settings-modal-body .ide-settings-tab-link.active,
+body[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link.active,
+html[data-theme='default'] .ide-settings-modal-body .ide-settings-tab-link.active {
+background-color: rgba(47, 158, 82, 0.16) !important;
+color: #7ee787 !important;
+}
+
+body:not([data-theme='light']) .dropdown-menu,
+body[data-theme='default'] .dropdown-menu,
+html:not([data-theme='light']) .dropdown-menu,
+html[data-theme='default'] .dropdown-menu {
+background-color: #1f2733 !important;
+--dropdown-background: #1f2733 !important;
+--bs-dropdown-bg: #1f2733 !important;
+border: 1px solid #313d4f !important;
+box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+body:not([data-theme='light']) .dropdown-item,
+body[data-theme='default'] .dropdown-item,
+html:not([data-theme='light']) .dropdown-item,
+html[data-theme='default'] .dropdown-item,
+body:not([data-theme='light']) .dropdown-menu a,
+body[data-theme='default'] .dropdown-menu a,
+body:not([data-theme='light']) .dropdown-menu button,
+body[data-theme='default'] .dropdown-menu button,
+body:not([data-theme='light']) .dropdown-menu li,
+body[data-theme='default'] .dropdown-menu li {
+background-color: transparent !important;
+--dropdown-background: #1f2733 !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .dropdown-item:hover,
+body:not([data-theme='light']) .dropdown-item:focus,
+body[data-theme='default'] .dropdown-item:hover,
+body[data-theme='default'] .dropdown-item:focus,
+html:not([data-theme='light']) .dropdown-item:hover,
+html:not([data-theme='light']) .dropdown-item:focus,
+html[data-theme='default'] .dropdown-item:hover,
+html[data-theme='default'] .dropdown-item:focus,
+body:not([data-theme='light']) .dropdown-menu a:hover,
+body:not([data-theme='light']) .dropdown-menu a:focus,
+body[data-theme='default'] .dropdown-menu a:hover,
+body[data-theme='default'] .dropdown-menu a:focus,
+body:not([data-theme='light']) .dropdown-menu button:hover,
+body:not([data-theme='light']) .dropdown-menu button:focus,
+body[data-theme='default'] .dropdown-menu button:hover,
+body[data-theme='default'] .dropdown-menu button:focus {
+background-color: #27313f !important;
+color: #ffffff !important;
+}
+
+body:not([data-theme='light']) .dropdown-divider,
+body[data-theme='default'] .dropdown-divider,
+html:not([data-theme='light']) .dropdown-divider,
+html[data-theme='default'] .dropdown-divider {
+border-top: 1px solid #313d4f !important;
+border-color: #313d4f !important;
+}
+
+body:not([data-theme='light']) .dropdown-item.disabled,
+body[data-theme='default'] .dropdown-item.disabled,
+html:not([data-theme='light']) .dropdown-item.disabled,
+html[data-theme='default'] .dropdown-item.disabled {
+background-color: transparent !important;
+color: #9aa5b1 !important;
+}
+
+[data-theme='light'] .dropdown-menu,
+body[data-theme='light'] .dropdown-menu,
+html[data-theme='light'] .dropdown-menu {
+background-color: #ffffff !important;
+--dropdown-background: #ffffff !important;
+--bs-dropdown-bg: #ffffff !important;
+border: 1px solid #e2e8f0 !important;
+box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme='light'] .dropdown-item,
+body[data-theme='light'] .dropdown-item,
+html[data-theme='light'] .dropdown-item,
+[data-theme='light'] .dropdown-menu a,
+body[data-theme='light'] .dropdown-menu a,
+[data-theme='light'] .dropdown-menu button,
+body[data-theme='light'] .dropdown-menu button {
+background-color: transparent !important;
+--dropdown-background: #ffffff !important;
+color: #1a202c !important;
+}
+
+[data-theme='light'] .dropdown-item:hover,
+[data-theme='light'] .dropdown-item:focus,
+body[data-theme='light'] .dropdown-item:hover,
+body[data-theme='light'] .dropdown-item:focus,
+[data-theme='light'] .dropdown-menu a:hover,
+[data-theme='light'] .dropdown-menu a:focus,
+body[data-theme='light'] .dropdown-menu a:hover,
+body[data-theme='light'] .dropdown-menu a:focus,
+[data-theme='light'] .dropdown-menu button:hover,
+[data-theme='light'] .dropdown-menu button:focus,
+body[data-theme='light'] .dropdown-menu button:hover,
+body[data-theme='light'] .dropdown-menu button:focus {
+background-color: #f1f5f9 !important;
+color: #0f172a !important;
+}
+
+[data-theme='light'] .dropdown-divider,
+body[data-theme='light'] .dropdown-divider {
+border-top: 1px solid #e2e8f0 !important;
+border-color: #e2e8f0 !important;
+}
+
+[data-theme='light'] .dropdown-item.disabled,
+body[data-theme='light'] .dropdown-item.disabled {
+background-color: transparent !important;
+color: #718096 !important;
+}
+
+body:not([data-theme='light']) .footer,
+body:not([data-theme='light']) footer,
+body:not([data-theme='light']) .thin-footer footer,
+body[data-theme='default'] .footer,
+body[data-theme='default'] footer {
+background-color: #161c24 !important;
+border-top-color: #313d4f !important;
+color: #9aa5b1 !important;
+}
+
+/* 7. Extra Dark Mode Refinements for Manage Users & Admin Controls */
+body:not([data-theme='light']) #main-content .btn-outline-secondary,
+body[data-theme='default'] #main-content .btn-outline-secondary {
+--bs-btn-color: #cdd5df !important;
+--bs-btn-border-color: #455268 !important;
+--bs-btn-hover-color: #ffffff !important;
+--bs-btn-hover-bg: #313d4f !important;
+--bs-btn-hover-border-color: #2f9e52 !important;
+color: #cdd5df !important;
+border-color: #455268 !important;
+background-color: #1b222c !important;
+}
+body:not([data-theme='light']) #main-content .btn-outline-secondary:hover,
+body[data-theme='default'] #main-content .btn-outline-secondary:hover {
+color: #ffffff !important;
+background-color: #313d4f !important;
+border-color: #2f9e52 !important;
+}
+
+body:not([data-theme='light']) .btn-admin-nav,
+body[data-theme='default'] .btn-admin-nav {
+color: #e8ecef !important;
+background-color: #1f2733 !important;
+border: 1px solid #313d4f !important;
+box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+body:not([data-theme='light']) .btn-admin-nav:hover,
+body[data-theme='default'] .btn-admin-nav:hover {
+background-color: #27313f !important;
+border-color: #2f9e52 !important;
+color: #2f9e52 !important;
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+body:not([data-theme='light']) .user-avatar,
+body[data-theme='default'] .user-avatar {
+background-color: #2a3443 !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .role-badge,
+body:not([data-theme='light']) .status-badge.text-dark,
+body:not([data-theme='light']) .badge.bg-light.text-dark,
+body:not([data-theme='light']) .badge.bg-secondary,
+body[data-theme='default'] .role-badge,
+body[data-theme='default'] .status-badge.text-dark,
+body[data-theme='default'] .badge.bg-light.text-dark,
+body[data-theme='default'] .badge.bg-secondary {
+color: #e8ecef !important;
+background-color: #27313f !important;
+border-color: #3d4c60 !important;
+}
+
+body:not([data-theme='light']) .alert-success,
+body[data-theme='default'] .alert-success {
+background-color: rgba(47, 158, 82, 0.15) !important;
+border-color: #2f9e52 !important;
+color: #7ee787 !important;
+}
+body:not([data-theme='light']) .alert-warning,
+body[data-theme='default'] .alert-warning {
+background-color: rgba(210, 153, 34, 0.15) !important;
+border-color: #d29922 !important;
+color: #e3b341 !important;
+}
+body:not([data-theme='light']) .alert-danger,
+body[data-theme='default'] .alert-danger {
+background-color: rgba(248, 81, 73, 0.15) !important;
+border-color: #f85149 !important;
+color: #ff7b72 !important;
+}
+body:not([data-theme='light']) .alert-info,
+body[data-theme='default'] .alert-info {
+background-color: rgba(56, 139, 253, 0.15) !important;
+border-color: #388bfd !important;
+color: #79c0ff !important;
+}
+
+body:not([data-theme='light']) .font-monospace a,
+body[data-theme='default'] .font-monospace a {
+color: #58a6ff !important;
+}
+
+body:not([data-theme='light']) .card.shadow-sm,
+body[data-theme='default'] .card.shadow-sm {
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 8. 'You' Badge Theme Styling */
+body:not([data-theme='light']) .badge-you,
+body:not([data-theme='light']) .badge.bg-info.bg-opacity-10,
+body:not([data-theme='light']) .badge.text-info-emphasis,
+body[data-theme='default'] .badge-you,
+body[data-theme='default'] .badge.bg-info.bg-opacity-10,
+body[data-theme='default'] .badge.text-info-emphasis {
+color: #79c0ff !important;
+background-color: rgba(56, 139, 253, 0.2) !important;
+border: 1px solid rgba(56, 139, 253, 0.45) !important;
+}
+
+[data-theme='light'] .badge-you,
+[data-theme='light'] .badge.bg-info.bg-opacity-10,
+[data-theme='light'] .badge.text-info-emphasis {
+color: #055160 !important;
+background-color: rgba(13, 202, 240, 0.15) !important;
+border: 1px solid #b6effb !important;
+}
+
+/* 9. Marketing Topbar Item Styling Consistency */
+body:not([data-theme='light']) nav.navbar .navbar-nav > li > .nav-link,
+body:not([data-theme='light']) nav.navbar .navbar-nav > li > button.dropdown-toggle,
+body[data-theme='default'] nav.navbar .navbar-nav > li > .nav-link,
+body[data-theme='default'] nav.navbar .navbar-nav > li > button.dropdown-toggle {
+color: #f4f5f6 !important;
+font-size: 14px !important;
+font-weight: 500 !important;
+border: none !important;
+background: transparent !important;
+transition: color 0.2s ease !important;
+}
+body:not([data-theme='light']) nav.navbar .navbar-nav > li > .nav-link:hover,
+body:not([data-theme='light']) nav.navbar .navbar-nav > li > button.dropdown-toggle:hover,
+body[data-theme='default'] nav.navbar .navbar-nav > li > .nav-link:hover,
+body[data-theme='default'] nav.navbar .navbar-nav > li > button.dropdown-toggle:hover {
+color: #ffffff !important;
+}
+
+[data-theme='light'] nav.navbar .navbar-nav > li > .nav-link,
+[data-theme='light'] nav.navbar .navbar-nav > li > button.dropdown-toggle {
+color: #333f48 !important;
+font-size: 14px !important;
+font-weight: 500 !important;
+border: none !important;
+background: transparent !important;
+transition: color 0.2s ease !important;
+}
+[data-theme='light'] nav.navbar .navbar-nav > li > .nav-link:hover,
+[data-theme='light'] nav.navbar .navbar-nav > li > button.dropdown-toggle:hover {
+color: #000000 !important;
+}
+
+/* 10. Project Tag Badges Theme Styling */
+body:not([data-theme='light']) .badge-tag,
+body[data-theme='default'] .badge-tag,
+html:not([data-theme='light']) .badge-tag,
+html[data-theme='default'] .badge-tag {
+background-color: #27313f !important;
+border: 1px solid #3d4c60 !important;
+color: #e8ecef !important;
+}
+
+body:not([data-theme='light']) .badge-tag .badge-tag-content,
+body:not([data-theme='light']) .badge-tag button.badge-tag-content-btn,
+body:not([data-theme='light']) .badge-tag .badge-content,
+body:not([data-theme='light']) .badge-tag-content,
+body:not([data-theme='light']) .badge-tag-content-btn,
+body:not([data-theme='light']) .badge-content,
+body[data-theme='default'] .badge-tag .badge-tag-content,
+body[data-theme='default'] .badge-tag button.badge-tag-content-btn,
+body[data-theme='default'] .badge-tag .badge-content,
+body[data-theme='default'] .badge-tag-content,
+body[data-theme='default'] .badge-tag-content-btn,
+body[data-theme='default'] .badge-content,
+html:not([data-theme='light']) .badge-tag .badge-tag-content,
+html:not([data-theme='light']) .badge-tag button.badge-tag-content-btn,
+html:not([data-theme='light']) .badge-tag .badge-content,
+html[data-theme='default'] .badge-tag .badge-tag-content,
+html[data-theme='default'] .badge-tag button.badge-tag-content-btn,
+html[data-theme='default'] .badge-tag .badge-content {
+color: #e8ecef !important;
+background: transparent !important;
+border: none !important;
+}
+
+body:not([data-theme='light']) .badge-tag .badge-tag-content:hover,
+body:not([data-theme='light']) .badge-tag button.badge-tag-content-btn:hover,
+body:not([data-theme='light']) .badge-tag-content:hover,
+body:not([data-theme='light']) .badge-tag-content-btn:hover,
+body[data-theme='default'] .badge-tag .badge-tag-content:hover,
+body[data-theme='default'] .badge-tag button.badge-tag-content-btn:hover,
+body[data-theme='default'] .badge-tag-content:hover,
+body[data-theme='default'] .badge-tag-content-btn:hover,
+html:not([data-theme='light']) .badge-tag .badge-tag-content:hover,
+html:not([data-theme='light']) .badge-tag button.badge-tag-content-btn:hover,
+html[data-theme='default'] .badge-tag .badge-tag-content:hover,
+html[data-theme='default'] .badge-tag button.badge-tag-content-btn:hover {
+color: #ffffff !important;
+}
+
+body:not([data-theme='light']) .badge-tag .badge-close,
+body:not([data-theme='light']) .badge-tag .badge-close-icon,
+body:not([data-theme='light']) .badge-close,
+body:not([data-theme='light']) .badge-close-icon,
+body[data-theme='default'] .badge-tag .badge-close,
+body[data-theme='default'] .badge-tag .badge-close-icon,
+body[data-theme='default'] .badge-close,
+body[data-theme='default'] .badge-close-icon,
+html:not([data-theme='light']) .badge-tag .badge-close,
+html:not([data-theme='light']) .badge-tag .badge-close-icon,
+html[data-theme='default'] .badge-tag .badge-close,
+html[data-theme='default'] .badge-tag .badge-close-icon {
+color: #9aa5b1 !important;
+background: transparent !important;
+border: none !important;
+}
+
+body:not([data-theme='light']) .badge-tag .badge-close:hover,
+body:not([data-theme='light']) .badge-tag .badge-close:hover .badge-close-icon,
+body:not([data-theme='light']) .badge-close:hover,
+body:not([data-theme='light']) .badge-close:hover .badge-close-icon,
+body[data-theme='default'] .badge-tag .badge-close:hover,
+body[data-theme='default'] .badge-tag .badge-close:hover .badge-close-icon,
+body[data-theme='default'] .badge-close:hover,
+body[data-theme='default'] .badge-close:hover .badge-close-icon,
+html:not([data-theme='light']) .badge-tag .badge-close:hover,
+html:not([data-theme='light']) .badge-tag .badge-close:hover .badge-close-icon,
+html[data-theme='default'] .badge-tag .badge-close:hover,
+html[data-theme='default'] .badge-tag .badge-close:hover .badge-close-icon {
+color: #ffffff !important;
+}
+
+[data-theme='light'] .badge-tag,
+body[data-theme='light'] .badge-tag,
+html[data-theme='light'] .badge-tag {
+background-color: #f1f5f9 !important;
+border: 1px solid #e2e8f0 !important;
+color: #1a202c !important;
+}
+
+[data-theme='light'] .badge-tag .badge-tag-content,
+[data-theme='light'] .badge-tag button.badge-tag-content-btn,
+[data-theme='light'] .badge-tag .badge-content,
+[data-theme='light'] .badge-tag-content,
+[data-theme='light'] .badge-tag-content-btn,
+[data-theme='light'] .badge-content,
+body[data-theme='light'] .badge-tag .badge-tag-content,
+body[data-theme='light'] .badge-tag button.badge-tag-content-btn,
+body[data-theme='light'] .badge-tag .badge-content,
+body[data-theme='light'] .badge-tag-content,
+body[data-theme='light'] .badge-tag-content-btn,
+body[data-theme='light'] .badge-content {
+color: #1a202c !important;
+background: transparent !important;
+border: none !important;
+}
+
+[data-theme='light'] .badge-tag .badge-tag-content:hover,
+[data-theme='light'] .badge-tag button.badge-tag-content-btn:hover,
+[data-theme='light'] .badge-tag-content:hover,
+[data-theme='light'] .badge-tag-content-btn:hover,
+body[data-theme='light'] .badge-tag .badge-tag-content:hover,
+body[data-theme='light'] .badge-tag button.badge-tag-content-btn:hover,
+body[data-theme='light'] .badge-tag-content:hover,
+body[data-theme='light'] .badge-tag-content-btn:hover {
+color: #0f172a !important;
+}
+
+[data-theme='light'] .badge-tag .badge-close,
+[data-theme='light'] .badge-tag .badge-close-icon,
+[data-theme='light'] .badge-close,
+[data-theme='light'] .badge-close-icon,
+body[data-theme='light'] .badge-tag .badge-close,
+body[data-theme='light'] .badge-tag .badge-close-icon,
+body[data-theme='light'] .badge-close,
+body[data-theme='light'] .badge-close-icon {
+color: #64748b !important;
+background: transparent !important;
+border: none !important;
+}
+
+[data-theme='light'] .badge-tag .badge-close:hover,
+[data-theme='light'] .badge-tag .badge-close:hover .badge-close-icon,
+[data-theme='light'] .badge-close:hover,
+[data-theme='light'] .badge-close:hover .badge-close-icon,
+body[data-theme='light'] .badge-tag .badge-close:hover,
+body[data-theme='light'] .badge-tag .badge-close:hover .badge-close-icon,
+body[data-theme='light'] .badge-close:hover,
+body[data-theme='light'] .badge-close:hover .badge-close-icon {
+color: #0f172a !important;
+}
+
+
+

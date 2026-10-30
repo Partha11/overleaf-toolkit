@@ -95,6 +95,58 @@
 
 ## Configuration
 
+### Custom UI Styles
+
+Global branding and theme overrides live in `overrides/cloverleaf-overrides-v4.css`.
+The stylesheet is mounted read-only into Overleaf's public stylesheets directory
+and loaded by `_metadata.pug`; theme initialization remains inline.
+
+Manage Users-specific refinements are scoped to `.manage-users-page`, using
+`:where()` to preserve selector specificity. Shared card, table, form, modal,
+dropdown, and editor theme defaults remain global. Dark session-table stripes are
+scoped to `.clear-user-sessions`; light-mode stripes remain unchanged. The project
+list heading has a transparent dark-mode background so its `#main-content` ID does
+not pick up page-container styling. The `v1`, `v2`, and `v3` stylesheet mounts are
+retained for cached pages and rollback.
+
+Stylesheets are cached for one year. When changing these rules, use a new versioned
+filename and update both `_metadata.pug` and `overrides/docker-compose.override.yml`.
+Run `bin/docker-compose up -d --no-deps sharelatex` to synchronize the runtime
+configuration and recreate only the web container with the updated mount.
+A restart alone does not apply new mounts.
+
+Run `node scripts/test-ui-scopes.mjs` with the web container running to check
+selector isolation, unchanged shared CSS declarations, and template rendering.
+This check does not access the database or modify application data.
+
+For browser color regression checks (requires Chromium and Node 22+), run:
+
+```sh
+node scripts/test-ui-scopes.mjs /tmp/cloverleaf-ui-fixtures.json
+node scripts/test-session-theme.mjs /tmp/cloverleaf-ui-fixtures.json
+```
+
+The browser check covers sample session tables and project headings using the live
+login page's assets. It does not log in, clear sessions, or modify actual projects.
+
+### Manage Users JavaScript
+
+Manage Users loads the single implementation in `overrides/user-management.js`
+through the existing admin-only `/admin/user-management.js` route. The script tag
+uses the request's CSP nonce and `defer`; do not remove the nonce, because the
+application's `strict-dynamic` policy blocks ordinary same-origin script tags.
+The route retains Express's default caching and conditional revalidation.
+
+When changing the script, update the `?v=` value in `manage_users.pug` to the first
+12 hexadecimal characters of its SHA-256 digest. The UI structural check verifies
+the value. Restart only `sharelatex` to reload the cached Pug template.
+
+Run `node scripts/test-user-management.mjs /tmp/cloverleaf-ui-fixtures.json` after
+generating fixtures with `scripts/test-ui-scopes.mjs`. This checks CSP, deferred
+initialization, filtering, registration, link copying, promotion/demotion, deletion,
+and error/cancellation paths using sample users and intercepted action responses.
+It never submits admin mutations to the running application.
+
 ### Mail / SMTP Setup
 
 To enable automated invitation and password reset emails, configure your SMTP credentials in `config/variables.env`:
